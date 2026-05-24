@@ -4,6 +4,8 @@
   "type": "module",
   "description": "Static Apple Wallet pass landing page (no build step; Vercel serves files from the project root).",
   "scripts": {
-    "preflight": "node -e \"for (const k of ['WWDR_PEM_PATH','SIGNER_CERT_PATH','SIGNER_KEY_PATH']) if(!process.env[k]) throw new Error('Missing '+k)\""
+    "preflight": "node -e \"for (const k of ['WWDR_PEM_PATH','SIGNER_CERT_PATH','SIGNER_KEY_PATH']) if(!process.env[k]) throw new Error('Missing '+k)\"",
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js"
   }
 }
