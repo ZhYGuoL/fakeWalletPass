@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "exit 0",
+  "rewrites": [
+    {
+      "source": "/public/event-ticket.pkpass",
+      "destination": "/event-ticket.pkpass"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.pkpass",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.apple.pkpass"
+        }
+      ]
+    }
+  ]
+}

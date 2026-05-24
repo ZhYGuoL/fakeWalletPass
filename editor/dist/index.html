@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Wallet pass builder</title>
+    <script>
+      ;(function () {
+        try {
+          var t = localStorage.getItem("wallet-pass-editor-theme")
+          if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t)
+        } catch (e) {}
+      })()
+    </script>
+    <script type="module" crossorigin src="/assets/index--1p7Oxww.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNIdqluF.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

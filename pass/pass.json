@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.pass.com.zhiyuanguo.walletpasses",
+  "serialNumber": "MYTHOS-2026-INV-001",
+  "teamIdentifier": "N4GAW5JL9A",
+  "organizationName": "Anthropic",
+  "description": "Invite-only Mythos Access Event",
+  "backgroundColor": "rgb(240, 239, 234)",
+  "foregroundColor": "rgb(20, 20, 19)",
+  "labelColor": "rgb(204, 120, 92)",
+  "suppressStripShine": false,
+  "eventTicket": {
+    "headerFields": [
+      {
+        "key": "guest",
+        "label": "STATUS",
+        "value": "Attendee"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "event",
+        "label": "EVENT",
+        "value": "Invite-only Mythos Access Event"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "time",
+        "label": "TIME",
+        "value": "Sat April 11, 2026 @ 7:00 PM"
+      }
+    ],
+    "auxiliaryFields": [
+      {
+        "key": "location",
+        "label": "LOCATION",
+        "value": "500 Howard St., San Francisco, California"
+      }
+    ]
+  },
+  "barcodes": [
+    {
+      "message": "https://pkpassdownload-zhyguols-projects.vercel.app/api/get-pass",
+      "format": "PKBarcodeFormatQR",
+      "messageEncoding": "iso-8859-1"
+    }
+  ],
+  "barcode": {
+    "message": "https://pkpassdownload-zhyguols-projects.vercel.app/api/get-pass",
+    "format": "PKBarcodeFormatQR",
+    "messageEncoding": "iso-8859-1"
+  }
+}

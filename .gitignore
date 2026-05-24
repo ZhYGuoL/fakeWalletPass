@@ -1,0 +1,13 @@
+# Signing material — keep local only
+certs/
+
+# Dependencies
+node_modules/
+
+# Secrets and env
+.env
+.env.local
+
+# Tooling
+.venv/
+.DS_Store

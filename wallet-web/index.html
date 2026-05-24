@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add to Apple Wallet</title>
+    <meta
+      name="description"
+      content="Download an Apple Wallet pass for this event. Tap the badge on iPhone or iPad to add the pass."
+    />
+    <style>
+      :root {
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.5;
+        color: #1a1a1a;
+        background: #f5f5f7;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      main {
+        text-align: center;
+        max-width: 28rem;
+      }
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 1.25rem;
+      }
+      .wallet-link {
+        display: inline-block;
+        line-height: 0;
+        text-decoration: none;
+        border-radius: 6px;
+      }
+      .wallet-link:focus-visible {
+        outline: 2px solid #0071e3;
+        outline-offset: 4px;
+      }
+      .wallet-link img {
+        display: block;
+        height: auto;
+        width: min(160px, 100vw);
+      }
+      p.hint {
+        margin: 1.25rem 0 0;
+        font-size: 0.875rem;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Add to Apple Wallet</h1>
+      <a class="wallet-link" href="/api/get-pass" rel="noopener">
+        <img
+          src="/add-to-apple-wallet-badge.svg"
+          width="160"
+          height="49"
+          alt="Add to Apple Wallet"
+        />
+      </a>
+      <p class="hint">On iPhone or iPad, tap the badge to download the pass, then choose <strong>Add</strong>.</p>
+    </main>
+  </body>
+</html>

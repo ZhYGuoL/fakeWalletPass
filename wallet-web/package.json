@@ -1,0 +1,9 @@
+{
+  "name": "pkpass-download",
+  "private": true,
+  "type": "module",
+  "description": "Static Apple Wallet pass landing page (no build step; Vercel serves files from the project root).",
+  "scripts": {
+    "preflight": "node -e \"for (const k of ['WWDR_PEM_PATH','SIGNER_CERT_PATH','SIGNER_KEY_PATH']) if(!process.env[k]) throw new Error('Missing '+k)\""
+  }
+}
