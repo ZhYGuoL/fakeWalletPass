@@ -3,70 +3,515 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Add to Apple Wallet</title>
+    <title>Wallet Pass Test Generator</title>
     <meta
       name="description"
-      content="Download an Apple Wallet pass for this event. Tap the badge on iPhone or iPad to add the pass."
+      content="Guided local flow to extract a public Luma event page and generate a test Apple Wallet pass."
     />
     <style>
       :root {
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        line-height: 1.5;
-        color: #1a1a1a;
-        background: #f5f5f7;
+        line-height: 1.45;
+        color: #111827;
+        background: #f3f4f6;
+      }
+      * {
+        box-sizing: border-box;
       }
       body {
         margin: 0;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
+        padding: 1rem;
       }
       main {
-        text-align: center;
-        max-width: 28rem;
+        max-width: 920px;
+        margin: 0 auto;
       }
       h1 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin: 0 0 1.25rem;
+        margin: 0;
+        font-size: 1.5rem;
       }
-      .wallet-link {
+      p {
+        margin: 0.5rem 0 0;
+      }
+      .marker {
         display: inline-block;
-        line-height: 0;
-        text-decoration: none;
-        border-radius: 6px;
+        margin-top: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #f59e0b;
+        background: #fffbeb;
+        color: #92400e;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-radius: 999px;
       }
-      .wallet-link:focus-visible {
-        outline: 2px solid #0071e3;
-        outline-offset: 4px;
+      .step {
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        background: #ffffff;
       }
-      .wallet-link img {
+      .step h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 0.75rem;
+      }
+      label {
         display: block;
-        height: auto;
-        width: min(160px, 100vw);
+        font-size: 0.86rem;
+        color: #374151;
       }
-      p.hint {
-        margin: 1.25rem 0 0;
-        font-size: 0.875rem;
-        color: #555;
+      input,
+      textarea,
+      select,
+      button {
+        width: 100%;
+        margin-top: 0.25rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.55rem 0.65rem;
+        font: inherit;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 84px;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: end;
+      }
+      .row > *:first-child {
+        flex: 1;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 600;
+        background: #1d4ed8;
+        color: #ffffff;
+        border-color: #1d4ed8;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+      .muted {
+        color: #4b5563;
+        font-size: 0.88rem;
+      }
+      .status {
+        margin-top: 0.5rem;
+        font-size: 0.88rem;
+      }
+      .status.error {
+        color: #b91c1c;
+      }
+      .status.ok {
+        color: #166534;
+      }
+      .preview {
+        margin-top: 0.5rem;
+        max-width: 280px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+      }
+      .hidden {
+        display: none;
+      }
+      #resolve-items {
+        display: grid;
+        gap: 0.8rem;
+      }
+      .resolve-item {
+        padding: 0.75rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+      }
+      .resolve-item strong {
+        display: block;
+        font-size: 0.9rem;
+      }
+      .resolve-options {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.45rem;
+      }
+      .resolve-options label {
+        display: inline-flex;
+        gap: 0.35rem;
+        align-items: center;
+      }
+      .resolve-options input[type="radio"] {
+        width: auto;
+        margin: 0;
+      }
+      #ticket-type-select-wrap {
+        margin-top: 0.75rem;
+      }
+      .health-ready {
+        color: #166534;
+      }
+      .health-not-ready {
+        color: #b91c1c;
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>Add to Apple Wallet</h1>
-      <a class="wallet-link" href="/api/get-pass" rel="noopener">
-        <img
-          src="/add-to-apple-wallet-badge.svg"
-          width="160"
-          height="49"
-          alt="Add to Apple Wallet"
-        />
-      </a>
-      <p class="hint">On iPhone or iPad, tap the badge to download the pass, then choose <strong>Add</strong>.</p>
+      <h1>Wallet Pass Test Generator</h1>
+      <p>Guided local flow for extracting public event data, reviewing details, and generating a `.pkpass` file.</p>
+      <div class="marker">TEST / NOT VALID</div>
+
+      <section class="step">
+        <h2>1. Extract</h2>
+        <div class="row">
+          <label>
+            Public Luma URL
+            <input id="luma-url" type="url" placeholder="https://lu.ma/your-event" />
+          </label>
+          <button id="extract-btn" type="button">Extract data</button>
+        </div>
+        <p class="muted">Only public page data is used. Hidden attendee/ticket data will not be fetched.</p>
+        <div id="extract-status" class="status"></div>
+      </section>
+
+      <section id="review-panel" class="step">
+        <h2>2. Review</h2>
+        <div class="grid">
+          <label>
+            Event title
+            <input id="event-title" type="text" />
+          </label>
+          <label>
+            Start date/time (ISO)
+            <input id="start-datetime" type="text" placeholder="2026-06-01T18:00:00-07:00" />
+          </label>
+          <label>
+            Guest name
+            <input id="guest-name" type="text" placeholder="Jane Guest" />
+          </label>
+          <label>
+            Host name
+            <input id="host-name" type="text" placeholder="Luma Labs" />
+          </label>
+        </div>
+        <label style="margin-top: 0.75rem;">
+          Location / address
+          <textarea id="address" placeholder="123 Main St, San Francisco, CA"></textarea>
+        </label>
+        <label style="margin-top: 0.75rem;">
+          Event image URL
+          <input id="event-image-url" type="url" placeholder="https://example.com/event.jpg" />
+        </label>
+        <img id="event-image-preview" class="preview hidden" alt="Event preview" />
+      </section>
+
+      <section class="step">
+        <h2>3. Resolve</h2>
+        <p class="muted">For each missing or hidden field, pick whether to provide your own value or use a test placeholder.</p>
+        <div id="resolve-items"></div>
+        <div id="ticket-type-select-wrap" class="hidden">
+          <label>
+            Ticket type (required when multiple exist)
+            <select id="ticket-type-select">
+              <option value="">Select a ticket type</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2>4. Generate</h2>
+        <div class="row">
+          <div>
+            <div id="signing-status" class="status">Signing health has not been checked yet.</div>
+          </div>
+          <button id="refresh-signing-btn" type="button">Refresh signing health</button>
+        </div>
+        <button id="generate-btn" type="button" disabled>Generate .pkpass</button>
+        <div id="generate-status" class="status"></div>
+      </section>
     </main>
+
+    <script>
+      const state = {
+        extracted: {},
+        missingFields: [],
+        hiddenFields: [],
+        ticketTypes: [],
+        signingReady: false,
+        resolutions: {},
+      };
+
+      const placeholders = {
+        eventTitle: "Unknown event (test placeholder)",
+        startDateTime: "2026-01-01T12:00:00Z",
+        guestName: "Guest Placeholder",
+        hostName: "Unknown host",
+        address: "Address unavailable on public page",
+      };
+
+      const fieldLabels = {
+        eventTitle: "Event title",
+        startDateTime: "Start date/time",
+        guestName: "Guest name",
+        hostName: "Host name",
+        address: "Location / address",
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const setStatus = (id, message, type = "") => {
+        const node = $(id);
+        node.textContent = message;
+        node.className = `status ${type}`.trim();
+      };
+
+      function updateImagePreview() {
+        const preview = $("event-image-preview");
+        const src = $("event-image-url").value.trim();
+        if (!src) {
+          preview.classList.add("hidden");
+          preview.removeAttribute("src");
+          return;
+        }
+        preview.src = src;
+        preview.classList.remove("hidden");
+      }
+
+      function getReviewValues() {
+        return {
+          eventTitle: $("event-title").value.trim(),
+          startDateTime: $("start-datetime").value.trim(),
+          guestName: $("guest-name").value.trim(),
+          hostName: $("host-name").value.trim(),
+          address: $("address").value.trim(),
+          eventImageUrl: $("event-image-url").value.trim(),
+        };
+      }
+
+      function renderResolveItems() {
+        const container = $("resolve-items");
+        container.innerHTML = "";
+        const targets = [...new Set([...state.missingFields, ...state.hiddenFields])];
+
+        if (targets.length === 0) {
+          container.innerHTML = '<p class="muted">No missing/hidden fields were detected for this extraction.</p>';
+          return;
+        }
+
+        for (const field of targets) {
+          const item = document.createElement("div");
+          item.className = "resolve-item";
+          const label = fieldLabels[field] || field;
+          const isMissing = state.missingFields.includes(field);
+          const reason = isMissing
+            ? "Not found in the public page extraction."
+            : "Likely private/hidden in Luma and not visible in public HTML.";
+          const current = state.resolutions[field] || { mode: "provide", value: "" };
+          state.resolutions[field] = current;
+
+          item.innerHTML = `
+            <strong>${label}</strong>
+            <div class="muted">${reason}</div>
+            <div class="resolve-options">
+              <label><input type="radio" name="resolve-${field}" value="provide" ${current.mode === "provide" ? "checked" : ""} /> Provide value</label>
+              <label><input type="radio" name="resolve-${field}" value="placeholder" ${current.mode === "placeholder" ? "checked" : ""} /> Use placeholder</label>
+            </div>
+            <label style="margin-top: 0.5rem;">
+              Value (used when "Provide value" is selected)
+              <input type="text" id="resolve-input-${field}" value="${current.value || ""}" ${current.mode === "placeholder" ? "disabled" : ""} />
+            </label>
+          `;
+
+          container.appendChild(item);
+
+          const radioProvide = item.querySelector(`input[name="resolve-${field}"][value="provide"]`);
+          const radioPlaceholder = item.querySelector(`input[name="resolve-${field}"][value="placeholder"]`);
+          const valueInput = item.querySelector(`#resolve-input-${field}`);
+
+          radioProvide.addEventListener("change", () => {
+            state.resolutions[field].mode = "provide";
+            valueInput.disabled = false;
+            updateGenerateButtonState();
+          });
+          radioPlaceholder.addEventListener("change", () => {
+            state.resolutions[field].mode = "placeholder";
+            valueInput.disabled = true;
+            updateGenerateButtonState();
+          });
+          valueInput.addEventListener("input", () => {
+            state.resolutions[field].value = valueInput.value.trim();
+            updateGenerateButtonState();
+          });
+        }
+      }
+
+      function renderTicketTypes() {
+        const wrap = $("ticket-type-select-wrap");
+        const select = $("ticket-type-select");
+        select.innerHTML = '<option value="">Select a ticket type</option>';
+
+        if (state.ticketTypes.length <= 1) {
+          wrap.classList.add("hidden");
+          return;
+        }
+
+        for (const type of state.ticketTypes) {
+          const opt = document.createElement("option");
+          opt.value = type;
+          opt.textContent = type;
+          select.appendChild(opt);
+        }
+        wrap.classList.remove("hidden");
+      }
+
+      function resolvedValue(field, reviewValues) {
+        const resolution = state.resolutions[field];
+        if (!resolution) return reviewValues[field] || "";
+        if (resolution.mode === "placeholder") return placeholders[field] || "Placeholder value";
+        return resolution.value || reviewValues[field] || "";
+      }
+
+      function updateGenerateButtonState() {
+        const values = getReviewValues();
+        let canGenerate = Boolean(values.eventTitle && values.startDateTime && values.guestName);
+
+        const targets = [...new Set([...state.missingFields, ...state.hiddenFields])];
+        for (const field of targets) {
+          const value = resolvedValue(field, values);
+          if (!value) {
+            canGenerate = false;
+            break;
+          }
+        }
+
+        if (state.ticketTypes.length > 1 && !$("ticket-type-select").value) canGenerate = false;
+        if (!state.signingReady) canGenerate = false;
+
+        $("generate-btn").disabled = !canGenerate;
+      }
+
+      async function refreshSigningHealth() {
+        try {
+          setStatus("signing-status", "Checking signing health...");
+          const res = await fetch("/api/signing-health");
+          const data = await res.json();
+          state.signingReady = Boolean(data.ready);
+          const detail = data.ready ? "Ready to sign passes." : "Not ready. Configure cert/key env paths before generating.";
+          const cssClass = data.ready ? "health-ready" : "health-not-ready";
+          const list = Array.isArray(data.missing) && data.missing.length > 0
+            ? ` Missing: ${data.missing.join(", ")}.`
+            : "";
+          const node = $("signing-status");
+          node.textContent = `Signing health: ${detail}${list}`;
+          node.className = `status ${cssClass}`;
+        } catch (error) {
+          state.signingReady = false;
+          setStatus("signing-status", `Failed to check signing health: ${error.message}`, "error");
+        } finally {
+          updateGenerateButtonState();
+        }
+      }
+
+      async function handleExtract() {
+        const url = $("luma-url").value.trim();
+        if (!url) {
+          setStatus("extract-status", "Enter a Luma URL first.", "error");
+          return;
+        }
+
+        setStatus("extract-status", "Extracting public event data...");
+        try {
+          const res = await fetch("/api/extract-luma", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error || "Extraction failed");
+
+          state.extracted = data.extracted || {};
+          state.missingFields = Array.isArray(data.missingFields) ? data.missingFields : [];
+          state.hiddenFields = Array.isArray(data.hiddenFields) ? data.hiddenFields : [];
+          state.ticketTypes = Array.isArray(data.ticketTypes) ? data.ticketTypes.filter(Boolean) : [];
+          state.resolutions = {};
+
+          $("event-title").value = state.extracted.eventTitle || "";
+          $("start-datetime").value = state.extracted.startDateTime || "";
+          $("host-name").value = state.extracted.hostName || "";
+          $("address").value = state.extracted.address || "";
+          $("event-image-url").value = state.extracted.eventImageUrl || "";
+          updateImagePreview();
+
+          renderResolveItems();
+          renderTicketTypes();
+          setStatus("extract-status", "Extraction complete. Review and resolve fields before generating.", "ok");
+          updateGenerateButtonState();
+        } catch (error) {
+          setStatus("extract-status", error.message, "error");
+        }
+      }
+
+      function getFilenameFromResponse(response) {
+        const cd = response.headers.get("Content-Disposition");
+        const match = cd && cd.match(/filename="([^"]+)"/);
+        return match ? match[1] : "event-test.pkpass";
+      }
+
+      async function handleGenerate() {
+        const values = getReviewValues();
+        const payload = {
+          ...values,
+          ticketTypes: state.ticketTypes,
+        };
+
+        const targets = [...new Set([...state.missingFields, ...state.hiddenFields])];
+        for (const field of targets) payload[field] = resolvedValue(field, values);
+        if (state.ticketTypes.length > 1) payload.selectedTicketType = $("ticket-type-select").value;
+
+        setStatus("generate-status", "Generating pass...");
+        try {
+          const res = await fetch("/api/generate-pass", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data?.error || "Generation failed");
+          }
+
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = getFilenameFromResponse(res);
+          a.click();
+          URL.revokeObjectURL(url);
+          setStatus("generate-status", "Pass generated and download started.", "ok");
+        } catch (error) {
+          setStatus("generate-status", error.message, "error");
+        }
+      }
+
+      $("extract-btn").addEventListener("click", handleExtract);
+      $("refresh-signing-btn").addEventListener("click", refreshSigningHealth);
+      $("generate-btn").addEventListener("click", handleGenerate);
+      $("ticket-type-select").addEventListener("change", updateGenerateButtonState);
+      $("event-image-url").addEventListener("input", updateImagePreview);
+
+      for (const id of ["event-title", "start-datetime", "guest-name", "host-name", "address", "event-image-url"]) {
+        $(id).addEventListener("input", updateGenerateButtonState);
+      }
+
+      refreshSigningHealth();
+    </script>
   </body>
 </html>
