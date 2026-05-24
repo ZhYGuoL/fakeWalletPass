@@ -200,3 +200,9 @@ Expose preflight status in UI:
 - Deployed/public environment setup.
 - Non-Luma sources.
 - Any login-gated scraping behavior.
+
+## Implementation Notes
+
+- Added local APIs: `/api/extract-luma`, `/api/signing-health`, `/api/generate-pass`
+- Enforced test-only marker and dummy QR at server normalization layer
+- Confirmed local `.pkpass` download and signing preflight gating
