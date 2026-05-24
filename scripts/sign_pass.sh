@@ -43,7 +43,8 @@ fi
 openssl smime -binary -sign -certfile "$WWDR" -signer "$CERT" -inkey "$KEY" \
   -in "$PASS_DIR/manifest.json" -out "$PASS_DIR/signature" -outform DER
 
-PKPASS="$BUILD/event-ticket.pkpass"
+PKPASS_NAME="${1:-event-ticket.pkpass}"
+PKPASS="$BUILD/$PKPASS_NAME"
 rm -f "$PKPASS"
 cd "$PASS_DIR"
 # Zip exactly manifest entries + manifest.json + signature (not source PNGs like luma_logo.png)
