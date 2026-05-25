@@ -9,10 +9,13 @@ from PIL import Image
 
 PASS_DIR = Path(__file__).resolve().parent.parent / "pass"
 ROOT = Path(__file__).resolve().parent.parent
-# Prefer project-root Anthropic (or other) wordmark; then pass-local assets.
+# Apple allots ~160×50 pt for logo.png; real Luma passes use a smaller wordmark inside that slot.
+LOGO_CANVAS_HEIGHT_PT = 50
+LOGO_WORDMARK_HEIGHT_RATIO = 0.49
+# Prefer Luma wordmark when building Luma-style event tickets.
 WORDMARK_CANDIDATES = (
-    ROOT / "Logo.png",
     PASS_DIR / "luma_logo.png",
+    ROOT / "Logo.png",
     PASS_DIR / "anthropic_logo.png",
 )
 LUMA_FALLBACK_GLOB = "Screenshot*.png"
@@ -45,6 +48,46 @@ def _strip_background(im: Image.Image, tolerance: int = 38) -> Image.Image:
     return out_im
 
 
+def _strip_luma_matte_blue(im: Image.Image, tolerance: int = 50) -> Image.Image:
+    """Remove the navy matte baked into some luma_logo.png exports; keep white wordmark."""
+    im = im.convert("RGBA")
+    bg = (74, 86, 138)
+    out: list[tuple[int, int, int, int]] = []
+    for r, g, b, a in im.getdata():
+        if a == 0:
+            out.append((0, 0, 0, 0))
+            continue
+        if min(r, g, b) > 210:
+            out.append((255, 255, 255, 255))
+            continue
+        if max(abs(r - bg[0]), abs(g - bg[1]), abs(b - bg[2])) <= tolerance:
+            out.append((255, 255, 255, 0))
+            continue
+        lum = 0.299 * r + 0.587 * g + 0.114 * b
+        if lum > 160:
+            alpha = max(0, min(255, int((lum - 100) * 255 / 155)))
+            out.append((255, 255, 255, alpha))
+        else:
+            out.append((255, 255, 255, 0))
+    cleaned = Image.new("RGBA", im.size)
+    cleaned.putdata(out)
+    bbox = cleaned.getbbox()
+    return cleaned.crop(bbox) if bbox else cleaned
+
+
+def _needs_luma_matte_strip(im: Image.Image) -> bool:
+    im = im.convert("RGBA")
+    blue_matte = 0
+    visible = 0
+    for r, g, b, a in im.getdata():
+        if a < 128:
+            continue
+        visible += 1
+        if b > r + 8 and b > g and r < 130:
+            blue_matte += 1
+    return visible > 0 and blue_matte / visible > 0.4
+
+
 def _scale_height(im: Image.Image, target_h: int) -> Image.Image:
     if im.height <= 0:
         return im
@@ -66,22 +109,25 @@ def build_icons(mark: Image.Image) -> None:
 def build_logo_strips(mark: Image.Image) -> None:
     """Header strip: wordmark only. Wallet centers logo in header — do not bake time/date here."""
     for scale, suffix in ((1, ""), (2, "@2x"), (3, "@3x")):
-        h = 50 * scale
-        m = _scale_height(mark, h)
+        canvas_h = LOGO_CANVAS_HEIGHT_PT * scale
+        wordmark_h = max(1, int(canvas_h * LOGO_WORDMARK_HEIGHT_RATIO))
+        m = _scale_height(mark, wordmark_h)
         max_w = int(160 * scale)
         if m.width > max_w:
             r = max_w / m.width
             m = m.resize((max_w, max(1, int(m.height * r))), Image.Resampling.LANCZOS)
         w = max(m.width + 4 * scale, 80 * scale)
-        canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        y = (h - m.height) // 2
+        canvas = Image.new("RGBA", (w, canvas_h), (0, 0, 0, 0))
+        y = (canvas_h - m.height) // 2
         canvas.paste(m, (0, y), m)
         canvas.save(PASS_DIR / f"logo{suffix}.png", format="PNG")
 
 
 def _prepare_wordmark(im: Image.Image) -> Image.Image:
-    """Keep true RGBA transparency; only chroma-strip fully opaque images (e.g. screenshots)."""
+    """Normalize wordmark to transparent RGBA (strip matte fills or corner-keyed backgrounds)."""
     im = im.convert("RGBA")
+    if _needs_luma_matte_strip(im):
+        im = _strip_luma_matte_blue(im)
     alpha_ext = im.split()[3].getextrema()
     if alpha_ext != (255, 255):
         return im

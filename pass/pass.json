@@ -1,54 +1,61 @@
 {
   "formatVersion": 1,
   "passTypeIdentifier": "pass.pass.com.zhiyuanguo.walletpasses",
-  "serialNumber": "MYTHOS-2026-INV-001",
   "teamIdentifier": "N4GAW5JL9A",
-  "organizationName": "Anthropic",
-  "description": "Invite-only Mythos Access Event",
-  "backgroundColor": "rgb(240, 239, 234)",
-  "foregroundColor": "rgb(20, 20, 19)",
-  "labelColor": "rgb(204, 120, 92)",
+  "serialNumber": "MYTHOS-2026-INV-001-a15a7d98bc35-4a220de6417b-fd34c97b0907-74ce7e556417-528a52bcac80-f735bc1d385a-70f443d5c6f8-8117c52c2069-647c6259435a-ee10d3a500c8-69cb61cf3d33-33ec300a7fee-08ea70907475-410f7e480f8e-842240aff56a-c49a63a9d8fa-8b76f904b4c6-b03dc7c04112-08b727a9a634-c3d709463a32-7f0495f094ea-3c1dd2ec1139-72c003b49644-c188f248325f-93c1e7e386d9-2fa0d7912618-ded9eb680b55-c4b8ca22354c-0b242d2f7c40-ce3373226b85-cd93b2deb375-89bbe285ceef-56d693d07dfa-7b71847b86ad-858612b384f7-4432cafb7f4f-07309a527889-9cfca99f4385-71891d42aac5-77b5212441da-445b496c0a5b-0d2d325392ed-cb0188f52454-44883477af46",
+  "organizationName": "Luma",
+  "description": "Gen Z Marketers & Creators in the Park \u2600\ufe0f",
+  "backgroundColor": "rgb(50, 91, 165)",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "labelColor": "rgb(200, 200, 200)",
   "suppressStripShine": false,
   "eventTicket": {
     "headerFields": [
       {
-        "key": "guest",
-        "label": "STATUS",
-        "value": "Attendee"
+        "key": "datetime",
+        "label": "12:00 PM",
+        "textAlignment": "PKTextAlignmentRight",
+        "value": "24 May 2026"
       }
     ],
     "primaryFields": [
       {
         "key": "event",
-        "label": "EVENT",
-        "value": "Invite-only Mythos Access Event"
+        "label": "",
+        "value": "Gen Z Marketers & Creators in the Park \u2600\ufe0f"
       }
     ],
     "secondaryFields": [
       {
-        "key": "time",
-        "label": "TIME",
-        "value": "Sat April 11, 2026 @ 7:00 PM"
+        "key": "location",
+        "label": "LOCATION",
+        "value": "Mission Dolores Park"
       }
     ],
     "auxiliaryFields": [
       {
-        "key": "location",
-        "label": "LOCATION",
-        "value": "500 Howard St., San Francisco, California"
+        "key": "guest",
+        "label": "GUEST",
+        "value": "Zhiyuan Guo"
+      },
+      {
+        "key": "entry",
+        "label": "HOST",
+        "value": "Elsewher3 \u2601\ufe0f",
+        "textAlignment": "PKTextAlignmentRight"
       }
     ]
   },
   "barcodes": [
     {
-      "message": "https://pkpassdownload-zhyguols-projects.vercel.app/api/get-pass",
       "format": "PKBarcodeFormatQR",
+      "message": "https://example.invalid/test-pass/1779664524418",
       "messageEncoding": "iso-8859-1"
     }
   ],
   "barcode": {
-    "message": "https://pkpassdownload-zhyguols-projects.vercel.app/api/get-pass",
     "format": "PKBarcodeFormatQR",
+    "message": "https://example.invalid/test-pass/1779664524418",
     "messageEncoding": "iso-8859-1"
   }
 }

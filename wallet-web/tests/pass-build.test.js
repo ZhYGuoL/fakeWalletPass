@@ -2,9 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildPassFilename, rgbFromAverages } from "../api/_lib/passBuild.js";
 
-test("buildPassFilename returns deterministic safe filename", () => {
-  const out = buildPassFilename("Founder Dinner", "2026-06-01T18:00:00-07:00");
-  assert.match(out, /^test-founder-dinner-\d{8}T\d{6}\.pkpass$/);
+test("buildPassFilename returns short safe filename", () => {
+  const out = buildPassFilename("Founder Dinner");
+  assert.equal(out, "founder-dinner.pkpass");
+});
+
+test("buildPassFilename truncates long event titles", () => {
+  const out = buildPassFilename("Gen Z Marketers & Creators in the Park");
+  assert.equal(out, "gen-z-marketers.pkpass");
 });
 
 test("rgbFromAverages returns CSS rgb string", () => {

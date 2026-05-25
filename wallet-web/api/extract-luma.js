@@ -1,8 +1,8 @@
-import { extractFromLumaHtml } from "./_lib/lumaExtract.js";
+import { extractFromLumaHtml, isValidLumaEventUrl } from "./_lib/lumaExtract.js";
 
 export async function POST(request) {
   const { url } = await request.json();
-  if (!/^https?:\/\/(www\.)?lu\.ma\/.+/.test(url || "")) {
+  if (!isValidLumaEventUrl(url)) {
     return Response.json({ error: "Invalid Luma URL" }, { status: 400 });
   }
   const res = await fetch(url);

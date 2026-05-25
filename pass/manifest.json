@@ -1,9 +1,13 @@
 {
-  "icon.png": "c7704b3a0440f52f9f24b20e3e07e36551f01ec4",
-  "icon@2x.png": "dc56b1269d95d0e6ed2c1a2bfc66d23f8c2efb6f",
-  "icon@3x.png": "6218bc4066b400b9009c9df8864e5a07693cc7ab",
-  "logo.png": "0688787c0bcff8b15c16864df52f0dbe6d1a3342",
-  "logo@2x.png": "5e5ff355578c9c1752c0ce46288bb590d6ff68e2",
-  "logo@3x.png": "dad68134891b03c9c9547a23f87c200bdd444953",
-  "pass.json": "fcf24b7e2423006b1ff7d6aacc4474fc58b7a5e9"
+  "icon.png": "557ebb2a56ed7fcead6a2aa0936d94e19b14b239",
+  "icon@2x.png": "567c0df0bf493d0d946c1cbc77ea33f4ea361f4c",
+  "icon@3x.png": "5455f58e59b9860e4ad34435c25abf7030da856c",
+  "logo.png": "4b68524185213630f90d1514120791dc119d0a0f",
+  "logo@2x.png": "bc011a582286d3f5e457ba7be9e53c869b2ab3ef",
+  "logo@3x.png": "642f515091accce148c55cbcbcda861dbe602e71",
+  "pass.json": "b1eb603147123906df9925d99172fea311d555fc",
+  "render-fallback.png": "7cd248ebf05705124b3ca188ba750b2d0a0e6998",
+  "thumbnail.png": "e351b6959ca3e453f767fcf31d374b682b59f073",
+  "thumbnail@2x.png": "46a46b7842a4647bafc149a78c4b4eefbf34fa74",
+  "thumbnail@3x.png": "3d39b38c6394f9ce68f50a253d22ee1cc5041c9a"
 }

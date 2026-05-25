@@ -3,241 +3,1405 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Wallet Pass Test Generator</title>
+    <title>Luma iMessage Pass Agent</title>
     <meta
       name="description"
-      content="Guided local flow to extract a public Luma event page and generate a test Apple Wallet pass."
+      content="Text a Luma link, get a Wallet pass. A visual-first preview of the iMessage pass agent."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap"
+      rel="stylesheet"
     />
     <style>
       :root {
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        line-height: 1.45;
-        color: #111827;
-        background: #f3f4f6;
+        --font-display: "Sora", "Avenir Next", "Helvetica Neue", sans-serif;
+        --font-body: "Manrope", "Avenir Next", "Helvetica Neue", sans-serif;
+
+        --bg: oklch(0.975 0.01 280);
+        --bg-soft: oklch(0.955 0.015 280);
+        --surface: oklch(0.995 0.004 280);
+        --surface-soft: oklch(0.975 0.01 280);
+        --text: oklch(0.25 0.03 275);
+        --text-muted: oklch(0.48 0.02 276);
+        --border: oklch(0.88 0.012 275);
+
+        --accent: oklch(0.59 0.23 295);
+        --accent-2: oklch(0.66 0.2 235);
+        --accent-ink: oklch(0.17 0.03 275);
+        --highlight: oklch(0.89 0.07 315);
+
+        --shadow-soft: 0 20px 50px oklch(0.38 0.06 280 / 0.12);
+        --shadow-hero: 0 45px 90px oklch(0.44 0.16 300 / 0.22);
+
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 32px;
+        --space-2xl: 48px;
+        --space-3xl: 64px;
+
+        --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
       }
+
       * {
         box-sizing: border-box;
       }
+
+      html,
       body {
         margin: 0;
-        padding: 1rem;
+        min-height: 100%;
       }
-      main {
-        max-width: 920px;
+
+      body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background:
+          radial-gradient(circle at 8% 10%, oklch(0.92 0.06 300 / 0.95), transparent 34%),
+          radial-gradient(circle at 88% 4%, oklch(0.9 0.08 235 / 0.85), transparent 32%),
+          linear-gradient(180deg, var(--bg) 0%, oklch(0.96 0.008 280) 100%);
+      }
+
+      .orb {
+        position: fixed;
+        width: 38rem;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        filter: blur(50px);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .orb-a {
+        left: -10rem;
+        top: -8rem;
+        background: oklch(0.83 0.15 300 / 0.45);
+        animation: float-a 14s var(--ease-out-quart) infinite alternate;
+      }
+
+      .orb-b {
+        right: -12rem;
+        top: 20%;
+        background: oklch(0.84 0.14 238 / 0.4);
+        animation: float-b 16s var(--ease-out-quart) infinite alternate;
+      }
+
+      .shell {
+        max-width: 1160px;
         margin: 0 auto;
+        padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+        display: grid;
+        gap: var(--space-3xl);
       }
-      h1 {
-        margin: 0;
-        font-size: 1.5rem;
+
+      .hero {
+        min-height: calc(100vh - 120px);
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: var(--space-xl);
+        text-align: center;
       }
-      p {
-        margin: 0.5rem 0 0;
-      }
-      .marker {
-        display: inline-block;
-        margin-top: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        border: 1px solid #f59e0b;
-        background: #fffbeb;
-        color: #92400e;
-        font-weight: 600;
-        font-size: 0.85rem;
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        border: 1px solid var(--border);
+        background: color-mix(in oklch, var(--surface) 88%, var(--highlight));
         border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 0.77rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        opacity: 0;
+        transform: translateY(16px);
+        animation: reveal 720ms var(--ease-out-expo) forwards;
       }
-      .step {
-        margin-top: 1rem;
-        padding: 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 12px;
-        background: #ffffff;
+
+      .title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(2.4rem, 6vw, 5.4rem);
+        line-height: 1.04;
+        max-width: 14ch;
+        letter-spacing: -0.03em;
+        text-wrap: balance;
+        opacity: 0;
+        transform: translateY(22px);
+        animation: reveal 760ms var(--ease-out-expo) 120ms forwards;
       }
-      .step h2 {
-        margin: 0 0 0.5rem;
-        font-size: 1rem;
+
+      .title em {
+        font-style: normal;
+        color: color-mix(in oklch, var(--accent) 82%, var(--accent-2));
       }
-      .grid {
+
+      .subtitle {
+        margin: 0;
+        max-width: 56ch;
+        font-size: clamp(1rem, 2vw, 1.26rem);
+        line-height: 1.6;
+        color: var(--text-muted);
+        opacity: 0;
+        transform: translateY(18px);
+        animation: reveal 700ms var(--ease-out-expo) 230ms forwards;
+      }
+
+      .cta-wrap {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 0.75rem;
+        gap: var(--space-md);
+        justify-items: center;
+        opacity: 0;
+        transform: translateY(12px);
+        animation: reveal 680ms var(--ease-out-expo) 300ms forwards;
       }
-      label {
-        display: block;
-        font-size: 0.86rem;
-        color: #374151;
-      }
-      input,
-      textarea,
-      select,
-      button {
-        width: 100%;
-        margin-top: 0.25rem;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 0.55rem 0.65rem;
-        font: inherit;
-      }
-      textarea {
-        resize: vertical;
-        min-height: 84px;
-      }
-      .row {
-        display: flex;
-        gap: 0.5rem;
-        align-items: end;
-      }
-      .row > *:first-child {
-        flex: 1;
-      }
-      button {
+
+      .agent-cta {
+        appearance: none;
+        border: 1px solid oklch(0.52 0.17 292 / 0.35);
+        border-radius: 18px;
+        padding: 16px 26px;
+        font-family: var(--font-display);
+        font-size: clamp(1.04rem, 2vw, 1.2rem);
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: var(--accent-ink);
+        background: linear-gradient(
+          140deg,
+          color-mix(in oklch, var(--surface) 46%, var(--accent) 54%) 0%,
+          color-mix(in oklch, var(--surface) 36%, var(--accent-2) 64%) 100%
+        );
+        box-shadow: var(--shadow-hero);
         cursor: pointer;
-        font-weight: 600;
-        background: #1d4ed8;
-        color: #ffffff;
-        border-color: #1d4ed8;
+        transition:
+          transform 220ms var(--ease-out-quart),
+          box-shadow 240ms var(--ease-out-quart),
+          filter 180ms var(--ease-out-quart);
       }
-      button:disabled {
-        cursor: not-allowed;
-        opacity: 0.55;
+
+      .agent-cta:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 36px 90px oklch(0.46 0.16 296 / 0.3);
+        filter: saturate(1.1);
       }
-      .muted {
-        color: #4b5563;
-        font-size: 0.88rem;
+
+      .agent-cta:active {
+        transform: scale(0.98);
       }
-      .status {
-        margin-top: 0.5rem;
-        font-size: 0.88rem;
+
+      .agent-cta:focus-visible {
+        outline: 3px solid color-mix(in oklch, var(--accent) 62%, white);
+        outline-offset: 4px;
       }
-      .status.error {
-        color: #b91c1c;
+
+      .cta-hint {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
       }
-      .status.ok {
-        color: #166534;
-      }
-      .preview {
-        margin-top: 0.5rem;
-        max-width: 280px;
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
-      }
-      .hidden {
-        display: none;
-      }
-      #resolve-items {
+
+      .signal {
+        width: min(100%, 900px);
         display: grid;
-        gap: 0.8rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--space-md);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: reveal 650ms var(--ease-out-expo) 420ms forwards;
       }
-      .resolve-item {
-        padding: 0.75rem;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
+
+      .signal-item {
+        background: color-mix(in oklch, var(--surface) 92%, var(--accent-2));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 16px;
+        box-shadow: var(--shadow-soft);
+        text-align: left;
       }
-      .resolve-item strong {
+
+      .signal-item b {
         display: block;
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+      }
+
+      .signal-item span {
+        color: var(--text-muted);
         font-size: 0.9rem;
       }
-      .resolve-options {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-top: 0.45rem;
+
+      .how {
+        background: color-mix(in oklch, var(--surface) 96%, var(--accent-2));
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: var(--space-2xl);
+        box-shadow: var(--shadow-soft);
+        display: grid;
+        gap: var(--space-xl);
       }
-      .resolve-options label {
-        display: inline-flex;
-        gap: 0.35rem;
-        align-items: center;
+
+      .how-head {
+        display: grid;
+        gap: var(--space-sm);
       }
-      .resolve-options input[type="radio"] {
-        width: auto;
+
+      .how-head h2 {
         margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(1.7rem, 3.2vw, 2.7rem);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
       }
-      #ticket-type-select-wrap {
-        margin-top: 0.75rem;
+
+      .how-head p {
+        margin: 0;
+        color: var(--text-muted);
+        max-width: 68ch;
       }
-      .health-ready {
-        color: #166534;
+
+      .viz-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-lg);
       }
-      .health-not-ready {
-        color: #b91c1c;
+
+      .viz-card {
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--surface-soft);
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+        transition:
+          transform 250ms var(--ease-out-quart),
+          box-shadow 250ms var(--ease-out-quart);
+      }
+
+      .viz-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 48px oklch(0.42 0.05 285 / 0.14);
+      }
+
+      .viz-media {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid color-mix(in oklch, var(--border) 78%, var(--accent-2));
+        background: oklch(0.94 0.02 280);
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+      }
+
+      .viz-card h3 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+      }
+
+      .viz-card p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .step-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 10px;
+      }
+
+      .step-list li {
+        border: 1px solid var(--border);
+        background: color-mix(in oklch, var(--surface) 95%, var(--highlight));
+        border-radius: 12px;
+        padding: 10px 12px;
+        color: var(--text-muted);
+      }
+
+      .footer-note {
+        margin: 0;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      @keyframes reveal {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float-a {
+        from {
+          transform: translateY(0) translateX(0);
+        }
+        to {
+          transform: translateY(-40px) translateX(30px);
+        }
+      }
+
+      @keyframes float-b {
+        from {
+          transform: translateY(0) translateX(0);
+        }
+        to {
+          transform: translateY(30px) translateX(-26px);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          min-height: auto;
+          padding-top: var(--space-xl);
+        }
+        .how {
+          padding: var(--space-xl);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Wallet Pass Test Generator</h1>
-      <p>Guided local flow for extracting public event data, reviewing details, and generating a `.pkpass` file.</p>
-      <div class="marker">TEST / NOT VALID</div>
+    <div class="orb orb-a" aria-hidden="true"></div>
+    <div class="orb orb-b" aria-hidden="true"></div>
 
-      <section class="step">
-        <h2>1. Extract</h2>
-        <div class="row">
-          <label>
-            Public Luma URL
-            <input id="luma-url" type="url" placeholder="https://lu.ma/your-event" />
-          </label>
-          <button id="extract-btn" type="button">Extract data</button>
+    <main class="shell">
+      <section class="hero">
+        <span class="chip">iMessage agent preview · built for fast event nights</span>
+        <h1 class="title">Send a Luma link, get your Wallet pass in <em>seconds</em>.</h1>
+        <p class="subtitle">
+          This is the new front door for your iMessage pass agent: text the bot any Luma URL, it scrapes event details,
+          then replies with a downloadable `.pkpass` for Apple Wallet.
+        </p>
+
+        <div class="cta-wrap">
+          <button id="add-agent-btn" class="agent-cta" type="button" aria-label="Add iMessage agent number">
+            + Add Agent Number
+          </button>
+          <p class="cta-hint">Visual-only for now. Functionality gets wired next.</p>
         </div>
-        <p class="muted">Only public page data is used. Hidden attendee/ticket data will not be fetched.</p>
-        <div id="extract-status" class="status"></div>
-      </section>
 
-      <section id="review-panel" class="step">
-        <h2>2. Review</h2>
-        <div class="grid">
-          <label>
-            Event title
-            <input id="event-title" type="text" />
-          </label>
-          <label>
-            Start date/time (ISO)
-            <input id="start-datetime" type="text" placeholder="2026-06-01T18:00:00-07:00" />
-          </label>
-          <label>
-            Guest name
-            <input id="guest-name" type="text" placeholder="Jane Guest" />
-          </label>
-          <label>
-            Host name
-            <input id="host-name" type="text" placeholder="Luma Labs" />
-          </label>
-        </div>
-        <label style="margin-top: 0.75rem;">
-          Location / address
-          <textarea id="address" placeholder="123 Main St, San Francisco, CA"></textarea>
-        </label>
-        <label style="margin-top: 0.75rem;">
-          Event image URL
-          <input id="event-image-url" type="url" placeholder="https://example.com/event.jpg" />
-        </label>
-        <img id="event-image-preview" class="preview hidden" alt="Event preview" />
-      </section>
-
-      <section class="step">
-        <h2>3. Resolve</h2>
-        <p class="muted">For each missing or hidden field, pick whether to provide your own value or use a test placeholder.</p>
-        <div id="resolve-items"></div>
-        <div id="ticket-type-select-wrap" class="hidden">
-          <label>
-            Ticket type (required when multiple exist)
-            <select id="ticket-type-select">
-              <option value="">Select a ticket type</option>
-            </select>
-          </label>
+        <div class="signal" aria-label="Key behavior highlights">
+          <article class="signal-item">
+            <b>Always-on text workflow</b>
+            <span>DM the same number anytime, no app install required.</span>
+          </article>
+          <article class="signal-item">
+            <b>Public Luma extraction</b>
+            <span>Reads event title, time, location, and imagery from public page data.</span>
+          </article>
+          <article class="signal-item">
+            <b>Wallet-ready result</b>
+            <span>Returns a `.pkpass` reply message ready to open and save.</span>
+          </article>
         </div>
       </section>
 
-      <section class="step">
-        <h2>4. Generate</h2>
-        <div class="row">
-          <div>
-            <div id="signing-status" class="status">Signing health has not been checked yet.</div>
-          </div>
-          <button id="refresh-signing-btn" type="button">Refresh signing health</button>
+      <section class="how" id="how-it-works">
+        <header class="how-head">
+          <h2>How it works (visualized with Remotion)</h2>
+          <p>
+            These motion panels are generated from Remotion compositions and mirror the actual message flow:
+            message intake, event extraction, and pass packaging.
+          </p>
+        </header>
+
+        <div class="viz-grid">
+          <article class="viz-card">
+            <img class="viz-media" src="media/agent-flow-extract.png" alt="Animated-style extract flow visualization" />
+            <h3>1) Message enters the agent</h3>
+            <p>User sends a Luma URL in iMessage. The agent starts extraction and resolves key fields.</p>
+          </article>
+
+          <article class="viz-card">
+            <img class="viz-media" src="media/agent-flow-pass.png" alt="Animated-style pass generation visualization" />
+            <h3>2) Pass gets assembled and signed</h3>
+            <p>Normalized payload becomes a `.pkpass` artifact prepared for Wallet download.</p>
+          </article>
+
+          <article class="viz-card">
+            <ol class="step-list">
+              <li><strong>Text URL</strong> → “https://luma.com/...“</li>
+              <li><strong>Agent parses</strong> → title, date, venue, image</li>
+              <li><strong>Pass renders</strong> → test-safe Wallet format</li>
+              <li><strong>Agent replies</strong> → tap to Add to Wallet</li>
+            </ol>
+            <h3>3) Fast conversational loop</h3>
+            <p>No dashboard required. It feels like chatting with a friend who always has your pass ready.</p>
+          </article>
         </div>
-        <button id="generate-btn" type="button" disabled>Generate .pkpass</button>
-        <div id="generate-status" class="status"></div>
+      </section>
+
+      <p class="footer-note">Not corporate. Not soulless. Built to feel alive and message-native.</p>
+    </main>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pass Studio · iMessage Agent for Luma Passes</title>
+    <meta
+      name="description"
+      content="Text a Luma link, get a test Apple Wallet pass back from an iMessage-style agent."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --font: "Hanken Grotesk", system-ui, sans-serif;
+        --font-display: "Sora", "Hanken Grotesk", system-ui, sans-serif;
+
+        --bg: oklch(0.985 0.004 250);
+        --surface: oklch(1 0.002 250);
+        --surface-2: oklch(0.975 0.006 250);
+        --sidebar: oklch(0.968 0.007 250);
+
+        --text: oklch(0.28 0.02 250);
+        --text-muted: oklch(0.52 0.018 250);
+        --text-subtle: oklch(0.64 0.012 250);
+
+        --border: oklch(0.905 0.008 250);
+        --border-strong: oklch(0.84 0.01 250);
+
+        --accent: oklch(0.42 0.06 250);
+        --accent-hover: oklch(0.36 0.07 250);
+        --accent-soft: oklch(0.94 0.02 250);
+
+        --ok: oklch(0.52 0.11 155);
+        --ok-bg: oklch(0.95 0.03 155);
+        --warn-bg: oklch(0.94 0.04 75);
+        --warn-text: oklch(0.42 0.08 55);
+        --err: oklch(0.52 0.14 25);
+        --err-bg: oklch(0.96 0.03 25);
+
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 32px;
+        --space-2xl: 48px;
+
+        --radius: 8px;
+        --sidebar-w: 220px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      .landing {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(64px, 10vw, 120px) clamp(20px, 6vw, 72px) clamp(44px, 7vw, 84px);
+      }
+
+      .landing::before,
+      .landing::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+      }
+
+      .landing::before {
+        width: clamp(320px, 40vw, 620px);
+        height: clamp(320px, 40vw, 620px);
+        top: clamp(-190px, -20vw, -120px);
+        left: clamp(-160px, -18vw, -80px);
+        background: radial-gradient(circle at 30% 30%, oklch(0.95 0.05 252), oklch(0.98 0.01 250 / 0));
+      }
+
+      .landing::after {
+        width: clamp(260px, 28vw, 420px);
+        height: clamp(260px, 28vw, 420px);
+        right: clamp(-90px, -8vw, -50px);
+        top: clamp(20px, 8vw, 80px);
+        background: radial-gradient(circle at 50% 50%, oklch(0.94 0.04 282), oklch(0.98 0.01 250 / 0));
+      }
+
+      .hero {
+        position: relative;
+        z-index: 1;
+        max-width: 980px;
+        margin: 0 auto;
+        border: 1px solid oklch(0.87 0.012 250);
+        border-radius: 28px;
+        padding: clamp(28px, 5vw, 56px);
+        background: linear-gradient(140deg, oklch(1 0.004 250 / 0.95), oklch(0.97 0.01 250 / 0.95));
+        box-shadow: 0 26px 72px oklch(0.28 0.02 250 / 0.11);
+        display: grid;
+        gap: clamp(22px, 4vw, 38px);
+        text-align: center;
+        animation: hero-rise 650ms cubic-bezier(0.25, 1, 0.5, 1) both;
+      }
+
+      .hero-kicker {
+        margin: 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+      }
+
+      .hero-kicker-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: oklch(0.58 0.14 155);
+        animation: dot-pulse 1800ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      }
+
+      .hero-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(2.05rem, 6vw, 4rem);
+        line-height: 1.08;
+        letter-spacing: -0.045em;
+        color: oklch(0.24 0.03 252);
+        max-width: 16ch;
+        margin-inline: auto;
+      }
+
+      .hero-copy {
+        margin: 0 auto;
+        max-width: 61ch;
+        font-size: clamp(0.94rem, 1.3vw, 1.06rem);
+        color: var(--text-muted);
+      }
+
+      .hero-copy strong {
+        color: oklch(0.33 0.04 252);
+      }
+
+      .hero-button-wrap {
+        display: grid;
+        place-items: center;
+        gap: var(--space-md);
+      }
+
+      .hero-agent-btn {
+        appearance: none;
+        border: 0;
+        cursor: pointer;
+        position: relative;
+        border-radius: 999px;
+        padding: 16px 30px;
+        min-width: min(100%, 390px);
+        font-family: var(--font-display);
+        font-size: clamp(0.95rem, 1.7vw, 1.15rem);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: oklch(0.98 0.01 250);
+        background: linear-gradient(135deg, oklch(0.42 0.07 248), oklch(0.34 0.09 270));
+        box-shadow: 0 14px 30px oklch(0.34 0.07 255 / 0.3), inset 0 1px 0 oklch(1 0 0 / 0.42);
+        transform: translateZ(0);
+        transition: transform 220ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 220ms cubic-bezier(0.25, 1, 0.5, 1), filter 220ms cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      .hero-agent-btn:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 18px 34px oklch(0.34 0.09 255 / 0.34), inset 0 1px 0 oklch(1 0 0 / 0.44);
+      }
+
+      .hero-agent-btn:active {
+        transform: translateY(1px) scale(0.98);
+      }
+
+      .hero-agent-btn:focus-visible {
+        outline: 3px solid oklch(0.76 0.08 250 / 0.6);
+        outline-offset: 3px;
+      }
+
+      .hero-agent-btn-sub {
+        display: block;
+        font-family: var(--font);
+        font-size: 0.74rem;
+        font-weight: 500;
+        opacity: 0.85;
+        margin-top: 2px;
+        letter-spacing: 0.01em;
+      }
+
+      .hero-note {
+        margin: 0;
+        color: var(--text-subtle);
+        font-size: 0.78rem;
+      }
+
+      .how {
+        margin: clamp(24px, 4vw, 44px) auto 0;
+        max-width: 1040px;
+        display: grid;
+        gap: var(--space-lg);
+      }
+
+      .how-head h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(1.35rem, 3.2vw, 2.2rem);
+        letter-spacing: -0.03em;
+        color: oklch(0.25 0.03 252);
+      }
+
+      .how-head p {
+        margin: var(--space-sm) 0 0;
+        max-width: 66ch;
+        color: var(--text-muted);
+      }
+
+      .viz-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-md);
+      }
+
+      .viz-card {
+        border: 1px solid oklch(0.88 0.012 250);
+        border-radius: 18px;
+        padding: var(--space-md);
+        background: oklch(0.995 0.004 250);
+        box-shadow: 0 14px 28px oklch(0.29 0.02 250 / 0.08);
+        transition: transform 240ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 240ms cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      .viz-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 36px oklch(0.29 0.03 250 / 0.1);
+      }
+
+      .viz-media {
+        margin: 0;
+      }
+
+      .viz-media img {
+        width: 100%;
+        display: block;
+        border-radius: 12px;
+        border: 1px solid oklch(0.86 0.013 250);
+      }
+
+      .viz-card h3 {
+        margin: 12px 0 0;
+        font-family: var(--font-display);
+        font-size: 1.02rem;
+        letter-spacing: -0.01em;
+      }
+
+      .viz-card p {
+        margin: 6px 0 0;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: var(--sidebar-w) 1fr;
+        min-height: 100vh;
+      }
+
+      /* —— Sidebar —— */
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        padding: var(--space-lg) var(--space-md);
+        background: var(--sidebar);
+        border-right: 1px solid var(--border);
+      }
+
+      .brand {
+        padding-bottom: var(--space-lg);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand-name {
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+
+      .brand-desc {
+        margin: var(--space-xs) 0 0;
+        font-size: 0.75rem;
+        color: var(--text-subtle);
+      }
+
+      .badge-test {
+        display: inline-block;
+        margin-top: var(--space-md);
+        padding: 3px 8px;
+        border-radius: 4px;
+        background: var(--warn-bg);
+        color: var(--warn-text);
+        font-size: 0.625rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .nav {
+        list-style: none;
+        margin: var(--space-lg) 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .nav li {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        border-radius: var(--radius);
+      }
+
+      .nav li::before {
+        content: attr(data-step);
+        display: inline-block;
+        width: 1.25rem;
+        margin-right: var(--space-sm);
+        font-variant-numeric: tabular-nums;
+        color: var(--text-subtle);
+        font-weight: 400;
+      }
+
+      .steps-label {
+        margin: var(--space-xl) 0 var(--space-sm);
+        padding: 0 var(--space-md);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+      }
+
+      .sidebar-foot {
+        margin-top: auto;
+        padding-top: var(--space-lg);
+        border-top: 1px solid var(--border);
+      }
+
+      .sidebar-foot label {
+        display: block;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        margin-bottom: var(--space-sm);
+      }
+
+      #signing-status {
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: var(--text-muted);
+      }
+
+      #signing-status.health-ready {
+        color: var(--ok);
+      }
+
+      #signing-status.health-not-ready,
+      #signing-status.error {
+        color: var(--err);
+      }
+
+      /* —— Main —— */
+      .main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-md);
+        padding: var(--space-md) var(--space-xl);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .topbar h1 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .topbar p {
+        margin: 2px 0 0;
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+      }
+
+      .content {
+        flex: 1;
+        padding: var(--space-xl);
+        max-width: 720px;
+      }
+
+      .panels {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-lg);
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+
+      .panel-head {
+        padding: var(--space-md) var(--space-lg);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .panel-head h2 {
+        margin: 0;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .panel-head span {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: var(--text-muted);
+      }
+
+      .panel-body {
+        padding: var(--space-lg);
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-md);
+      }
+
+      label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .field-hint {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.6875rem;
+        font-weight: 400;
+        color: var(--text-subtle);
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        margin-top: var(--space-sm);
+        padding: 0.5rem 0.625rem;
+        border: 1px solid var(--border-strong);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 0.8125rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      input:disabled,
+      textarea:disabled {
+        background: var(--surface-2);
+        color: var(--text-subtle);
+        cursor: not-allowed;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 72px;
+      }
+
+      .row {
+        display: flex;
+        gap: var(--space-sm);
+        align-items: flex-end;
+      }
+
+      .row > label {
+        flex: 1;
+        min-width: 0;
+      }
+
+      button {
+        font-family: var(--font);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 0.875rem;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: oklch(0.99 0.002 250);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-hover);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border-strong);
+      }
+
+      .btn-ghost:hover:not(:disabled) {
+        background: var(--surface-2);
+        color: var(--text);
+      }
+
+      .btn-block {
+        width: 100%;
+        padding: 0.625rem 1rem;
+      }
+
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .hint {
+        margin-top: var(--space-md);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .status {
+        margin-top: var(--space-sm);
+        font-size: 0.75rem;
+        line-height: 1.45;
+      }
+
+      .status.error {
+        color: var(--err);
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      .preview-wrap {
+        margin-top: var(--space-md);
+      }
+
+      .preview-label {
+        font-size: 0.6875rem;
+        font-weight: 500;
+        color: var(--text-subtle);
+        margin-bottom: var(--space-sm);
+      }
+
+      .preview {
+        display: block;
+        max-width: 100%;
+        width: 200px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #resolve-items {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+      }
+
+      .resolve-item {
+        padding: var(--space-md);
+        background: var(--surface-2);
+        border-radius: 6px;
+        border: 1px solid var(--border);
+      }
+
+      .resolve-item strong {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+      }
+
+      .resolve-item .muted {
+        margin-top: 2px;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .resolve-options {
+        display: flex;
+        gap: var(--space-lg);
+        flex-wrap: wrap;
+        margin-top: var(--space-sm);
+      }
+
+      .resolve-options label {
+        display: inline-flex;
+        gap: var(--space-sm);
+        align-items: center;
+        font-weight: 400;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
+      .resolve-options input[type="radio"] {
+        width: auto;
+        margin: 0;
+        accent-color: var(--accent);
+      }
+
+      #ticket-type-select-wrap {
+        margin-top: var(--space-md);
+        padding-top: var(--space-md);
+        border-top: 1px solid var(--border);
+      }
+
+      .field-block {
+        margin-top: var(--space-md);
+      }
+
+      @media (max-width: 768px) {
+        .landing {
+          padding-left: var(--space-md);
+          padding-right: var(--space-md);
+          padding-bottom: var(--space-xl);
+        }
+
+        .hero {
+          text-align: left;
+          border-radius: 22px;
+        }
+
+        .hero-title,
+        .hero-copy {
+          margin-inline: 0;
+          max-width: 100%;
+        }
+
+        .hero-kicker {
+          margin-inline: 0;
+        }
+
+        .hero-button-wrap {
+          place-items: start;
+        }
+
+        .hero-agent-btn {
+          width: 100%;
+        }
+
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .nav {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+
+        .nav li span {
+          display: none;
+        }
+
+        .content {
+          padding: var(--space-md);
+        }
+
+        .row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .row button {
+          width: 100%;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      @keyframes hero-rise {
+        from {
+          opacity: 0;
+          transform: translateY(22px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes dot-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        45% {
+          transform: scale(1.5);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="landing">
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="hero-kicker"><span class="hero-kicker-dot" aria-hidden="true"></span>iMessage pass agent preview</p>
+        <h1 id="hero-title" class="hero-title">Text a Luma link. Get a Wallet pass back in minutes.</h1>
+        <p class="hero-copy">
+          This landing flow previews the end-state product: an always-on iMessage agent that takes a public Luma link,
+          extracts event details, and returns a signed test `.pkpass` with clear <strong>TEST / NOT VALID</strong> safety markers.
+        </p>
+        <div class="hero-button-wrap">
+          <button id="add-agent-number-btn" class="hero-agent-btn" type="button" aria-label="Add the iMessage agent number">
+            +1 (415) 555-0199
+            <span class="hero-agent-btn-sub">Add agent number to contacts</span>
+          </button>
+          <p class="hero-note">Visual-only CTA for now — wiring comes next.</p>
+        </div>
+      </section>
+
+      <section class="how" aria-labelledby="how-it-works-heading">
+        <div class="how-head">
+          <h2 id="how-it-works-heading">How it works</h2>
+          <p>
+            The visualizations below are generated from Remotion compositions and represent the expected product flow from
+            incoming message to pass generation.
+          </p>
+        </div>
+        <div class="viz-grid">
+          <article class="viz-card">
+            <figure class="viz-media">
+              <img src="media/agent-flow-extract.png" alt="Remotion visualization showing Luma link extraction in the agent pipeline" />
+            </figure>
+            <h3>1) Message intake + extraction</h3>
+            <p>User drops a Luma URL into iMessage; agent parses public metadata and validates required fields.</p>
+          </article>
+          <article class="viz-card">
+            <figure class="viz-media">
+              <img src="media/agent-flow-pass.png" alt="Remotion visualization showing generated test Apple Wallet pass output" />
+            </figure>
+            <h3>2) Safe pass delivery</h3>
+            <p>System returns a signed `.pkpass` with forced TEST marker and dummy QR behavior for non-valid passes.</p>
+          </article>
+        </div>
       </section>
     </main>
+
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <p class="brand-name">Pass Studio</p>
+          <p class="brand-desc">Luma → Wallet</p>
+          <span class="badge-test">TEST / NOT VALID</span>
+        </div>
+
+        <p class="steps-label">Workflow</p>
+        <ol class="nav">
+          <li data-step="1"><span>Extract</span></li>
+          <li data-step="2"><span>Review</span></li>
+          <li data-step="3"><span>Resolve</span></li>
+          <li data-step="4"><span>Generate</span></li>
+        </ol>
+
+        <div class="sidebar-foot">
+          <label for="signing-status">Signing</label>
+          <div id="signing-status" class="status">Checking…</div>
+          <button id="refresh-signing-btn" type="button" class="btn-ghost btn-block" style="margin-top: var(--space-sm)">
+            Refresh
+          </button>
+        </div>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <div>
+            <h1>Test pass generator</h1>
+            <p>Public Luma data only · dummy QR · local signing</p>
+          </div>
+        </header>
+
+        <div class="content">
+          <div class="panels">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Extract</h2>
+                <span>Fetch publicly visible event data</span>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                  <label>
+                    Luma URL
+                    <input id="luma-url" type="url" placeholder="https://luma.com/your-event" />
+                  </label>
+                  <button id="extract-btn" type="button" class="btn-primary">Extract</button>
+                </div>
+                <p class="hint">No login or private attendee data is accessed.</p>
+                <div id="extract-status" class="status"></div>
+              </div>
+            </section>
+
+            <section id="review-panel" class="panel">
+              <div class="panel-head">
+                <h2>Review</h2>
+                <span>Confirm or edit extracted fields</span>
+              </div>
+              <div class="panel-body">
+                <div class="field-grid">
+                  <label>
+                    Event title
+                    <input id="event-title" type="text" />
+                  </label>
+                  <label>
+                    Start (ISO 8601)
+                    <input id="start-datetime" type="text" placeholder="2026-06-01T18:00:00-07:00" />
+                  </label>
+                  <label>
+                    Guest name
+                    <input id="guest-name" type="text" placeholder="Jane Guest" />
+                  </label>
+                  <label>
+                    Host
+                    <input id="host-name" type="text" placeholder="Luma Labs" />
+                  </label>
+                </div>
+                <label class="field-block">
+                  Location
+                  <textarea id="address" placeholder="123 Main St, San Francisco, CA"></textarea>
+                </label>
+                <label class="field-block">
+                  Event image URL
+                  <input id="event-image-url" type="url" placeholder="https://…" />
+                </label>
+                <div class="preview-wrap">
+                  <div class="preview-label">Image preview</div>
+                  <img id="event-image-preview" class="preview hidden" alt="Event preview" />
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Resolve</h2>
+                <span>Missing or hidden fields</span>
+              </div>
+              <div class="panel-body">
+                <div id="resolve-items"></div>
+                <div id="ticket-type-select-wrap" class="hidden">
+                  <label>
+                    Ticket type
+                    <select id="ticket-type-select">
+                      <option value="">Select a ticket type</option>
+                    </select>
+                    <span class="field-hint">Required when multiple types are detected</span>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Generate</h2>
+                <span>Download signed .pkpass</span>
+              </div>
+              <div class="panel-body">
+                <button id="generate-btn" type="button" class="btn-primary btn-block" disabled>
+                  Download .pkpass
+                </button>
+                <div id="generate-status" class="status"></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       const state = {
@@ -301,7 +1465,7 @@
         const targets = [...new Set([...state.missingFields, ...state.hiddenFields])];
 
         if (targets.length === 0) {
-          container.innerHTML = '<p class="muted">No missing/hidden fields were detected for this extraction.</p>';
+          container.innerHTML = '<p class="hint" style="margin:0">No missing or hidden fields.</p>';
           return;
         }
 
@@ -311,8 +1475,8 @@
           const label = fieldLabels[field] || field;
           const isMissing = state.missingFields.includes(field);
           const reason = isMissing
-            ? "Not found in the public page extraction."
-            : "Likely private/hidden in Luma and not visible in public HTML.";
+            ? "Not found on the public page."
+            : "Hidden until acceptance — not in public HTML.";
           const current = state.resolutions[field] || { mode: "provide", value: "" };
           state.resolutions[field] = current;
 
@@ -320,11 +1484,11 @@
             <strong>${label}</strong>
             <div class="muted">${reason}</div>
             <div class="resolve-options">
-              <label><input type="radio" name="resolve-${field}" value="provide" ${current.mode === "provide" ? "checked" : ""} /> Provide value</label>
+              <label><input type="radio" name="resolve-${field}" value="provide" ${current.mode === "provide" ? "checked" : ""} /> Enter value</label>
               <label><input type="radio" name="resolve-${field}" value="placeholder" ${current.mode === "placeholder" ? "checked" : ""} /> Use placeholder</label>
             </div>
-            <label style="margin-top: 0.5rem;">
-              Value (used when "Provide value" is selected)
+            <label class="field-block">
+              Value
               <input type="text" id="resolve-input-${field}" value="${current.value || ""}" ${current.mode === "placeholder" ? "disabled" : ""} />
             </label>
           `;
@@ -399,21 +1563,21 @@
 
       async function refreshSigningHealth() {
         try {
-          setStatus("signing-status", "Checking signing health...");
+          setStatus("signing-status", "Checking…");
           const res = await fetch("/api/signing-health");
           const data = await res.json();
           state.signingReady = Boolean(data.ready);
-          const detail = data.ready ? "Ready to sign passes." : "Not ready. Configure cert/key env paths before generating.";
+          const detail = data.ready ? "Ready" : "Not ready — check .env paths";
           const cssClass = data.ready ? "health-ready" : "health-not-ready";
           const list = Array.isArray(data.missing) && data.missing.length > 0
-            ? ` Missing: ${data.missing.join(", ")}.`
+            ? ` (${data.missing.join(", ")})`
             : "";
           const node = $("signing-status");
-          node.textContent = `Signing health: ${detail}${list}`;
+          node.textContent = `${detail}${list}`;
           node.className = `status ${cssClass}`;
         } catch (error) {
           state.signingReady = false;
-          setStatus("signing-status", `Failed to check signing health: ${error.message}`, "error");
+          setStatus("signing-status", `Check failed: ${error.message}`, "error");
         } finally {
           updateGenerateButtonState();
         }
@@ -426,7 +1590,7 @@
           return;
         }
 
-        setStatus("extract-status", "Extracting public event data...");
+        setStatus("extract-status", "Extracting…");
         try {
           const res = await fetch("/api/extract-luma", {
             method: "POST",
@@ -451,7 +1615,7 @@
 
           renderResolveItems();
           renderTicketTypes();
-          setStatus("extract-status", "Extraction complete. Review and resolve fields before generating.", "ok");
+          setStatus("extract-status", "Done.", "ok");
           updateGenerateButtonState();
         } catch (error) {
           setStatus("extract-status", error.message, "error");
@@ -467,6 +1631,7 @@
       async function handleGenerate() {
         const values = getReviewValues();
         const payload = {
+          ...state.extracted,
           ...values,
           ticketTypes: state.ticketTypes,
         };
@@ -475,7 +1640,7 @@
         for (const field of targets) payload[field] = resolvedValue(field, values);
         if (state.ticketTypes.length > 1) payload.selectedTicketType = $("ticket-type-select").value;
 
-        setStatus("generate-status", "Generating pass...");
+        setStatus("generate-status", "Generating…");
         try {
           const res = await fetch("/api/generate-pass", {
             method: "POST",
@@ -495,7 +1660,7 @@
           a.download = getFilenameFromResponse(res);
           a.click();
           URL.revokeObjectURL(url);
-          setStatus("generate-status", "Pass generated and download started.", "ok");
+          setStatus("generate-status", "Download started.", "ok");
         } catch (error) {
           setStatus("generate-status", error.message, "error");
         }

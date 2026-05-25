@@ -13,14 +13,14 @@ export function normalizePayload(input) {
     );
   }
   const hostOrTicketLabel =
-    ticketTypes.length > 0
-      ? input.selectedTicketType || ticketTypes[0]
+    ticketTypes.length > 1
+      ? input.selectedTicketType
       : input.hostName || "Unknown host";
 
   return {
     ...input,
     hostOrTicketLabel,
-    testMarker: "TEST / NOT VALID",
+    entryLabel: ticketTypes.length > 1 ? "TICKET" : "HOST",
     qrMessage: `https://example.invalid/test-pass/${Date.now()}`,
   };
 }

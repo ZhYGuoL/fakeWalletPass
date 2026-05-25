@@ -1,0 +1,9 @@
+export const SCREEN_BG = "oklch(0.13 0.008 60)";
+export const SCREEN_BG_TOP = "oklch(0.17 0.012 60)";
+export const PAPER = "oklch(0.96 0.012 80)";
+export const PAPER_SOFT = "oklch(0.86 0.018 75)";
+export const MUTED = "oklch(0.64 0.018 70)";
+export const RULE = "oklch(0.34 0.012 60)";
+export const BUBBLE_RECV = "oklch(0.23 0.012 60)";
+export const BUBBLE_SEND = "oklch(0.66 0.16 245)";
+export const HONEY = "oklch(0.82 0.15 78)";

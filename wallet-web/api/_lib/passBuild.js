@@ -9,27 +9,23 @@ const REPO_ROOT = resolve(__dirname, "..", "..", "..");
 const BUILD_DIR = resolve(REPO_ROOT, "build");
 
 function safeSlug(value) {
-  return String(value || "event")
+  const words = String(value || "event")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 64);
-}
-
-function compactTimestamp(isoStart) {
-  const parsed = new Date(isoStart);
-  if (Number.isNaN(parsed.getTime())) {
-    return "19700101T000000";
-  }
-  return parsed.toISOString().replace(/[-:]/g, "").slice(0, 15);
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3);
+  const slug = words.join("-").slice(0, 20).replace(/-+$/, "");
+  return slug || "luma-event";
 }
 
 export function rgbFromAverages({ r, g, b }) {
   return `rgb(${r},${g},${b})`;
 }
 
-export function buildPassFilename(eventTitle, isoStart) {
-  return `test-${safeSlug(eventTitle)}-${compactTimestamp(isoStart)}.pkpass`;
+export function buildPassFilename(eventTitle) {
+  const slug = safeSlug(eventTitle) || "luma-event";
+  return `${slug}.pkpass`;
 }
 
 async function getPythonExecutable() {
@@ -71,7 +67,7 @@ function runCommand(command, args, cwd) {
 
 /** @param {object} payload Normalized pass payload */
 export async function buildPass(payload) {
-  const filename = buildPassFilename(payload.eventTitle, payload.startDateTime);
+  const filename = buildPassFilename(payload.eventTitle);
   const tempDir = await mkdtemp(join(tmpdir(), "wallet-pass-payload-"));
   const payloadPath = join(tempDir, "payload.json");
   const python = await getPythonExecutable();

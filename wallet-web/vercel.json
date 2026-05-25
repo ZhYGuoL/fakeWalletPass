@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "devCommand": "node dev-server.mjs",
   "buildCommand": "exit 0",
+  "installCommand": "exit 0",
   "rewrites": [
     {
       "source": "/public/event-ticket.pkpass",
