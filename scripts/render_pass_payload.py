@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from datetime import datetime
 from io import BytesIO
@@ -31,6 +32,10 @@ PASS_STYLE_OVERRIDES: dict[str, dict[str, str]] = {
         "backgroundColor": "rgb(50, 91, 165)",
         "labelColor": "rgb(200, 200, 200)",
         "headerDateFormat": "day_first",
+    },
+    # https://luma.com/yachtparty1 — hardcoded cream background (#F8F2DD)
+    "yachtparty1": {
+        "backgroundColor": "rgb(248, 242, 221)",
     },
 }
 
@@ -76,6 +81,31 @@ def _luminance(r: int, g: int, b: int) -> float:
 def _is_dark_bg(hex_color: str) -> bool:
     r, g, b = _hex_to_rgb(hex_color)
     return _luminance(r, g, b) < 128
+
+
+# Backgrounds at or above this luminance need dark text instead of the
+# dark-pass default of white.
+LIGHT_BG_LUMINANCE = 140
+LIGHT_BG_FOREGROUND = "rgb(33, 33, 33)"
+LIGHT_BG_LABEL = "rgb(95, 95, 95)"
+
+
+def _parse_rgb_string(value: str | None) -> tuple[int, int, int] | None:
+    match = re.match(
+        r"\s*rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$",
+        value or "",
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    return tuple(_safe_int(int(c)) for c in match.groups())
+
+
+def _is_light_background(background: str) -> bool:
+    rgb = _parse_rgb_string(background)
+    if rgb is None:
+        return False
+    return _luminance(*rgb) >= LIGHT_BG_LUMINANCE
 
 
 def _is_accent_label(hex_color: str) -> bool:
@@ -376,11 +406,27 @@ def main() -> None:
         or palette_bg
         or _rgb_string(avg_r, avg_g, avg_b)
     )
+    light_bg = _is_light_background(background)
+
+    foreground = (
+        style_override.get("foregroundColor")
+        or payload.get("foregroundColor")
+        or (LIGHT_BG_FOREGROUND if light_bg else "rgb(255, 255, 255)")
+    )
+
     label_color = (
         style_override.get("labelColor")
         or palette_labels
         or "rgb(160, 160, 160)"
     )
+    # Palette/auto labels are always light tones (tuned for dark passes), so on
+    # a light background swap to a muted dark grey unless a label was set.
+    if (
+        light_bg
+        and not style_override.get("labelColor")
+        and not payload.get("labelColor")
+    ):
+        label_color = LIGHT_BG_LABEL
     header_date_format = style_override.get("headerDateFormat")
 
     start_iso = payload.get("startDateTime") or payload.get("startDateText") or "1970-01-01T00:00:00Z"
@@ -401,7 +447,7 @@ def main() -> None:
         "organizationName": "Luma",
         "description": event_title,
         "backgroundColor": background,
-        "foregroundColor": payload.get("foregroundColor") or "rgb(255, 255, 255)",
+        "foregroundColor": foreground,
         "labelColor": payload.get("labelColor") or label_color,
         "suppressStripShine": False,
         "eventTicket": {
