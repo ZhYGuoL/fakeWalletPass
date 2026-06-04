@@ -29,6 +29,7 @@ loadDotEnv();
 
 const API_ROUTES = {
   "POST /api/register-agent": () => import("./api/register-agent.js"),
+  "GET /api/stats": () => import("./api/stats.js"),
 };
 
 function readBody(req) {

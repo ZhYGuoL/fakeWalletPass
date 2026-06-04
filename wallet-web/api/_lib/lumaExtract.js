@@ -3,6 +3,21 @@ export function isValidLumaEventUrl(url) {
   return /^https?:\/\/(?:www\.)?(?:lu\.ma|luma\.com)\/.+/i.test(url || "");
 }
 
+/** Normalize bare or messy Luma URLs to https form for QR payloads. */
+export function normalizeLumaEventUrl(candidate) {
+  const cleaned = String(candidate ?? "")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .trim()
+    .replace(/[.,)]+$/, "");
+  if (!cleaned) return null;
+
+  const withScheme = /^https?:\/\//i.test(cleaned)
+    ? cleaned
+    : `https://${cleaned.replace(/^www\./i, "")}`;
+
+  return isValidLumaEventUrl(withScheme) ? withScheme : null;
+}
+
 const META_RE = /<meta[^>]+property="([^"]+)"[^>]+content="([^"]*)"/gi;
 const TIME_RE = /<time[^>]+datetime="([^"]+)"/i;
 const NEXT_DATA_RE =

@@ -1,9 +1,29 @@
 /**
- * POST /api/register-agent — register a shared Spectrum user (Photon Cloud).
+ * POST /api/register-agent — register a Spectrum user (Photon Cloud).
  * Proxies Photon credentials server-side; never expose PROJECT_SECRET to the client.
+ *
+ * When AGENT_LINE_PHONE is set (Business dedicated line), new users are registered
+ * as type "dedicated" against that line. Otherwise uses shared-pool registration.
  */
 
+import { isUserCapacityError, WAITLIST_USER_MESSAGE } from "./_lib/photon-errors.js";
+import { addToWaitlist } from "./_lib/waitlist.js";
+
 const E164 = /^\+[1-9]\d{6,14}$/;
+
+function buildRegistrationBody(phoneNumber) {
+  const agentLine = (process.env.AGENT_LINE_PHONE || "").trim();
+  if (agentLine) {
+    if (!E164.test(agentLine)) {
+      return { error: "Agent line is not configured correctly." };
+    }
+    return {
+      body: { type: "dedicated", phoneNumber, assignedPhoneNumber: agentLine },
+      mode: "dedicated",
+    };
+  }
+  return { body: { type: "shared", phoneNumber }, mode: "shared" };
+}
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -53,6 +73,11 @@ export async function POST(request) {
     return json({ error: "Agent registration is not configured yet." }, 503);
   }
 
+  const registration = buildRegistrationBody(phoneNumber);
+  if (registration.error) {
+    return json({ error: registration.error }, 503);
+  }
+
   const auth = Buffer.from(`${projectId}:${projectSecret}`).toString("base64");
   let photonRes;
   try {
@@ -63,7 +88,7 @@ export async function POST(request) {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ type: "shared", phoneNumber }),
+      body: JSON.stringify(registration.body),
     });
   } catch (err) {
     console.error("PHOTON_REGISTER_FETCH_FAILED", err?.message ?? err);
@@ -82,6 +107,27 @@ export async function POST(request) {
       typeof photonBody.message === "string"
         ? photonBody.message
         : `Registration failed (${photonRes.status}).`;
+
+    if (isUserCapacityError(message, photonRes.status)) {
+      try {
+        await addToWaitlist(phoneNumber);
+      } catch (err) {
+        console.error("WAITLIST_WRITE_FAILED", err?.message ?? err);
+        return json(
+          {
+            error: "We're at capacity and couldn't save your spot. Please try again in a moment.",
+          },
+          503,
+        );
+      }
+
+      return json({
+        waitlisted: true,
+        phoneNumber,
+        message: WAITLIST_USER_MESSAGE,
+      });
+    }
+
     return json({ error: message }, photonRes.ok ? 502 : photonRes.status);
   }
 
@@ -97,6 +143,7 @@ export async function POST(request) {
     userId: id,
     phoneNumber,
     assignedPhoneNumber,
+    registrationMode: registration.mode,
     messagesUrl,
   });
 }

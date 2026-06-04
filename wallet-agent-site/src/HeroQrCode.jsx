@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 
-const PRODUCTION_SITE_URL = "https://wallet-agent-site.vercel.app";
+const PRODUCTION_SITE_URL = "https://keypass.zygl.dev";
 
 function resolveSiteUrl() {
   const fromEnv = import.meta.env.VITE_SITE_URL?.trim();
@@ -37,8 +37,8 @@ export function HeroQrCode() {
       width: 192,
       margin: 1,
       color: {
-        dark: "#3a3228",
-        light: "#faf8f4",
+        dark: "#262730",
+        light: "#f8f7f4",
       },
     })
       .then((result) => {

@@ -65,6 +65,11 @@ export function AgentRegisterModal({ open, onClose }) {
       if (!res.ok) {
         throw new Error(data.error || "Registration failed. Try again.");
       }
+      if (data.waitlisted) {
+        setResult(data);
+        setStatus("waitlisted");
+        return;
+      }
       setResult(data);
       setStatus("success");
     } catch (err) {
@@ -106,15 +111,32 @@ export function AgentRegisterModal({ open, onClose }) {
           ×
         </button>
 
-        {status === "success" && result ? (
+        {status === "waitlisted" && result ? (
           <div className="agent-modal__success">
-            <p className="kicker kicker--honey">You're in</p>
+            <p className="kicker kicker--accent">Waitlist</p>
+            <h2 id={titleId} className="agent-modal__title">
+              You&apos;re on the list
+            </h2>
+            <p id={descId} className="agent-modal__lede">
+              Keypass has reached its user limit for now. We saved{" "}
+              {formatPhoneDisplay(result.phoneNumber)} and will add you as soon as we upgrade.
+            </p>
+
+            <div className="agent-modal__actions">
+              <button type="button" className="cta__button" onClick={onClose}>
+                <span className="cta__button-label">Continue</span>
+              </button>
+            </div>
+          </div>
+        ) : status === "success" && result ? (
+          <div className="agent-modal__success">
+            <p className="kicker kicker--accent">You're in</p>
             <h2 id={titleId} className="agent-modal__title">
               Text this line in iMessage
             </h2>
             <p id={descId} className="agent-modal__lede">
-              Keypass assigned you a dedicated agent number. Save it, then send any public Luma
-              link to get your pass.
+              Save the Keypass iMessage line below, then send any public Luma link to get your
+              pass.
             </p>
 
             <p className="agent-modal__number" aria-live="polite">
@@ -135,13 +157,13 @@ export function AgentRegisterModal({ open, onClose }) {
           </div>
         ) : (
           <form className="agent-modal__form" onSubmit={handleSubmit}>
-            <p className="kicker kicker--honey">Get started</p>
+            <p className="kicker kicker--accent">Get started</p>
             <h2 id={titleId} className="agent-modal__title">
               Add the agent to your phone
             </h2>
             <p id={descId} className="agent-modal__lede">
-              Enter the mobile number where you use iMessage. Photon assigns you a line to text —
-              no app download required.
+              Enter the mobile number where you use iMessage. We&apos;ll give you the Keypass line
+              to text. No app download required.
             </p>
 
             <label className="agent-modal__field">

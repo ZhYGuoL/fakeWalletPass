@@ -9,6 +9,8 @@
     "start": "tsx src/index.ts",
     "ping": "tsx src/ping.ts",
     "register": "tsx src/register.ts",
+    "register-waitlist": "node ../wallet-agent-site/scripts/bulk-register-waitlist.mjs",
+    "outreach-waitlist": "node scripts/bulk-outreach.mjs",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.js"
   },

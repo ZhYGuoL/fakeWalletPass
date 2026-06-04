@@ -5,17 +5,16 @@ import {
 } from "remotion";
 import { EASE_IN_OUT, EASE_OUT_EXPO, EASE_OUT_QUART } from "./easing";
 
-const CREAM = "oklch(0.97 0.016 86)";
-const CREAM_DEEP = "oklch(0.92 0.022 84)";
-const INK_SOFT = "oklch(0.48 0.02 54)";
-const RUST = "oklch(0.52 0.13 42)";
-const SAGE = "oklch(0.48 0.06 155)";
-const GOLD = "oklch(0.58 0.11 72)";
+const PAPER = "oklch(0.972 0.005 95)";
+const PAPER_DEEP = "oklch(0.93 0.006 95)";
+const INK_SOFT = "oklch(0.5 0.013 266)";
+const ACCENT = "oklch(0.5 0.16 258)";
+const ACCENT_SOFT = "oklch(0.66 0.13 258)";
 
 const NODES = [
-  { id: "message", x: 72, label: "Link", color: RUST },
-  { id: "build", x: 240, label: "Compose", color: SAGE },
-  { id: "wallet", x: 408, label: "Pass", color: GOLD },
+  { id: "message", x: 72, label: "Link", color: ACCENT },
+  { id: "build", x: 240, label: "Compose", color: ACCENT },
+  { id: "wallet", x: 408, label: "Pass", color: ACCENT },
 ];
 
 function clampInterp(frame, range, values, options = {}) {
@@ -66,10 +65,10 @@ function FlowParticle({ frame, fromX, toX, offset, reducedMotionEnabled }) {
         width: 8,
         height: 8,
         borderRadius: 999,
-        background: RUST,
+        background: ACCENT,
         transform: "translate(-50%, -50%)",
         opacity,
-        boxShadow: `0 0 12px ${RUST}`,
+        boxShadow: `0 0 12px ${ACCENT_SOFT}`,
       }}
     />
   );
@@ -105,9 +104,9 @@ function ProcessNode({ node, frame, phase, reducedMotionEnabled }) {
           height: isActive ? 72 : 56,
           borderRadius: node.id === "wallet" ? 14 : 999,
           border: `1.5px solid ${node.color}`,
-          background: isActive ? CREAM : CREAM_DEEP,
+          background: isActive ? PAPER : PAPER_DEEP,
           boxShadow: isActive
-            ? `0 0 0 8px oklch(0.52 0.13 42 / ${ringOpacity})`
+            ? `0 0 0 8px oklch(0.5 0.16 258 / ${ringOpacity})`
             : "none",
           display: "grid",
           placeItems: "center",
@@ -117,12 +116,12 @@ function ProcessNode({ node, frame, phase, reducedMotionEnabled }) {
       </div>
       <span
         style={{
-          fontFamily: "Bricolage Grotesque, sans-serif",
+          fontFamily: "IBM Plex Mono, monospace",
           fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.18em",
+          fontWeight: 500,
+          letterSpacing: "0.06em",
           textTransform: "uppercase",
-          color: isActive ? "oklch(0.24 0.028 52)" : INK_SOFT,
+          color: isActive ? "oklch(0.24 0.012 266)" : INK_SOFT,
         }}
       >
         {node.label}
@@ -141,7 +140,7 @@ function NodeGlyph({ id, frame, active, reduced }) {
           width: 18,
           height: 12,
           borderRadius: 6,
-          border: `2px solid ${RUST}`,
+          border: `2px solid ${ACCENT}`,
           transform: `rotate(${active ? -8 : 0}deg)`,
         }}
       />
@@ -162,7 +161,7 @@ function NodeGlyph({ id, frame, active, reduced }) {
             width: 4,
             height: h,
             borderRadius: 2,
-            background: SAGE,
+            background: ACCENT,
           }}
         />
       );
@@ -180,9 +179,9 @@ function NodeGlyph({ id, frame, active, reduced }) {
         width: 22,
         height: 28,
         borderRadius: 5,
-        border: `2px solid ${GOLD}`,
+        border: `2px solid ${ACCENT}`,
         transform: `rotate(${active ? spin * 0.15 : 0}deg)`,
-        background: "linear-gradient(160deg, oklch(0.97 0.02 82), oklch(0.86 0.07 64))",
+        background: "linear-gradient(160deg, oklch(0.96 0.01 258), oklch(0.86 0.06 258))",
       }}
     />
   );
@@ -206,9 +205,10 @@ function PhaseLabel({ phase, frame }) {
         right: 0,
         bottom: 36,
         textAlign: "center",
-        fontFamily: "Spectral, Georgia, serif",
-        fontStyle: "italic",
-        fontSize: 18,
+        fontFamily: "Hanken Grotesk, sans-serif",
+        fontWeight: 600,
+        fontSize: 17,
+        letterSpacing: "-0.01em",
         color: INK_SOFT,
         opacity,
       }}
@@ -232,7 +232,7 @@ function OrbitRing({ frame, reducedMotionEnabled }) {
         width: 320,
         height: 120,
         borderRadius: "50%",
-        border: "1px solid oklch(0.48 0.02 54 / 0.2)",
+        border: "1px solid oklch(0.5 0.013 266 / 0.18)",
         transform: `translate(-50%, -50%) scale(${scale})`,
       }}
     />
@@ -245,8 +245,8 @@ export function ProcessFlow({ phase = "message", reducedMotionEnabled = false })
   return (
     <AbsoluteFill
       style={{
-        background: `radial-gradient(90% 80% at 50% 40%, ${CREAM}, ${CREAM_DEEP})`,
-        fontFamily: "Bricolage Grotesque, sans-serif",
+        background: `radial-gradient(90% 80% at 50% 40%, ${PAPER}, ${PAPER_DEEP})`,
+        fontFamily: "Hanken Grotesk, sans-serif",
         overflow: "hidden",
       }}
     >

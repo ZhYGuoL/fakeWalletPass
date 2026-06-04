@@ -12,9 +12,12 @@ if ! $RAILWAY whoami >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ ! -f .railway/config.json ]]; then
+if ! $RAILWAY status >/dev/null 2>&1; then
   echo "No Railway project linked yet."
-  echo "Run this once (pick your workspace when prompted):"
+  echo "Link this folder to your existing Railway project:"
+  echo "  npx @railway/cli link"
+  echo
+  echo "To create a brand-new project instead:"
   echo "  npx @railway/cli init --name luma-imessage-agent"
   exit 1
 fi

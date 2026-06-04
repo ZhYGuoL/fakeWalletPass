@@ -121,30 +121,152 @@ const ACTS = [
 
 const ACT_INTERVAL_MS = 5600;
 
-function MarqueeBar() {
-  const tokens = [
-    "Keypass",
-    "·",
-    "iMessage agent",
-    "·",
-    "Luma → Apple Wallet",
-    "·",
-    "v0.2.0",
-    "·",
-  ];
-  const repeated = [...tokens, ...tokens, ...tokens, ...tokens];
+const SPEC_ITEMS = [
+  "iMessage only",
+  "Luma → Apple Wallet",
+  "Signed .pkpass",
+  "No app to install",
+];
+
+function formatUsd(amount) {
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+}
+
+// Pulls metrics from /api/stats once on load. No figures are baked into the
+// bundle; the displayed value is whatever the server returns at fetch time.
+function useLiveStats() {
+  const [saved, setSaved] = useState(null);
+  const [mostCopied, setMostCopied] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/stats", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!alive) return;
+        if (typeof data?.saved?.amount === "number") setSaved(data.saved.amount);
+        if (Array.isArray(data?.mostCopied)) setMostCopied(data.mostCopied);
+      } catch {
+        // leave skeletons in place if the fetch fails
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return { saved, mostCopied };
+}
+
+function EventCarousel({ events }) {
+  const trackRef = useRef(null);
+
+  const scrollByCard = (dir) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const card = track.querySelector(".sneak__item");
+    const amount = card ? card.offsetWidth + 20 : track.clientWidth * 0.8;
+    track.scrollBy({ left: dir * amount, behavior: "smooth" });
+  };
+
   return (
-    <div className="marquee" aria-hidden="true">
-      <div className="marquee__track">
-        {repeated.map((token, idx) => (
-          <span
-            key={`${token}-${idx}`}
-            className={`marquee__token ${token === "·" ? "marquee__token--dot" : ""}`}
+    <section id="sneak" className="sneak">
+      <header className="sneak__head">
+        <div className="sneak__intro">
+          <p className="kicker kicker--accent">Most copied this week</p>
+          <h2 className="display display--md">See where people are sneaking into.</h2>
+        </div>
+        <div className="sneak__nav">
+          <button
+            type="button"
+            className="sneak__arrow"
+            aria-label="Previous events"
+            onClick={() => scrollByCard(-1)}
           >
-            {token}
-          </span>
+            ←
+          </button>
+          <button
+            type="button"
+            className="sneak__arrow"
+            aria-label="Next events"
+            onClick={() => scrollByCard(1)}
+          >
+            →
+          </button>
+        </div>
+      </header>
+
+      <ul ref={trackRef} className="sneak__track">
+        {events
+          ? events.map((evt) => (
+              <li key={evt.url} className="sneak__item">
+                <a
+                  className="sneak__card"
+                  href={evt.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <div className="sneak__card-top">
+                    <span className="sneak__rank">{evt.rank}</span>
+                    <span className="sneak__copied">
+                      {evt.copied.toLocaleString("en-US")}&times; copied
+                    </span>
+                  </div>
+                  <h3 className="sneak__name">{evt.name}</h3>
+                  <p className="sneak__host">{evt.host}</p>
+                  <div className="sneak__perf" aria-hidden="true" />
+                  <div className="sneak__card-foot">
+                    <span className="sneak__loc">{evt.location}</span>
+                    <span className="sneak__chip">{evt.status}</span>
+                  </div>
+                  <span className="sneak__view">
+                    View on Luma <span aria-hidden="true">↗</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          : Array.from({ length: 4 }).map((_, idx) => (
+              <li key={idx} className="sneak__item" aria-hidden="true">
+                <div className="sneak__card sneak__card--skeleton">
+                  <div className="sneak__card-top">
+                    <span className="sneak__skel sneak__skel--rank" />
+                    <span className="sneak__skel sneak__skel--pill" />
+                  </div>
+                  <span className="sneak__skel sneak__skel--title" />
+                  <span className="sneak__skel sneak__skel--line" />
+                  <div className="sneak__perf" />
+                  <div className="sneak__card-foot">
+                    <span className="sneak__skel sneak__skel--line" />
+                  </div>
+                </div>
+              </li>
+            ))}
+      </ul>
+    </section>
+  );
+}
+
+function SpecStrip() {
+  return (
+    <div className="spec">
+      <ul className="spec__list">
+        {SPEC_ITEMS.map((item, idx) => (
+          <li key={item} className="spec__item">
+            <span className="spec__index" aria-hidden="true">
+              {String(idx + 1).padStart(2, "0")}
+            </span>
+            {item}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
@@ -163,9 +285,9 @@ function Show({ reducedMotionEnabled, pagePhase, showRef, showSeen }) {
   }, [active, reducedMotionEnabled]);
 
   return (
-    <section ref={showRef} className="show">
+    <section ref={showRef} id="how" className="show">
       <header className="show__head">
-        <p className="kicker kicker--ember">How it works</p>
+        <p className="kicker">How it works</p>
         <h2 className="display display--md">The pipeline, in three steps.</h2>
         <p className="show__lead">
           What Keypass does between your message and the door.
@@ -241,11 +363,10 @@ export default function App() {
   const [showRef, showSeen] = useReveal();
   const pagePhase = usePagePhase(heroRef);
   const [registerOpen, setRegisterOpen] = useState(false);
+  const { saved, mostCopied } = useLiveStats();
 
   return (
     <div className="page">
-      <div className="grain" aria-hidden="true" />
-
       <header className="topbar">
         <div className="mark">
           <span className="mark__glyph" aria-hidden="true">
@@ -254,8 +375,15 @@ export default function App() {
           <span className="mark__name">Keypass</span>
         </div>
         <nav className="topnav">
-          <span className="topnav__edition">Vol. 02 / 2026</span>
-          <a href="https://github.com" className="topnav__link" rel="noreferrer">
+          <a href="#how" className="topnav__link">
+            How it works
+          </a>
+          <a
+            href="https://github.com/zhyguol"
+            className="topnav__link"
+            target="_blank"
+            rel="noreferrer"
+          >
             Repo
           </a>
         </nav>
@@ -268,13 +396,13 @@ export default function App() {
           </PlayerErrorBoundary>
           <div className="hero__panel">
             <div className="hero__copy">
-              <p className="kicker kicker--honey">An iMessage agent for Apple Wallet</p>
+              <p className="kicker kicker--accent">An iMessage agent for Apple Wallet</p>
               <h1 className="display">
-                Every door ahead of you, unlocked with one message.
+                Text a link. Skip the line.
               </h1>
               <p className="lede">
-                Send a Luma link over iMessage. Keypass reads the event, builds
-                your pass, and sends it back before you reach the door.
+                Send a Luma link over iMessage and Keypass turns it into a Wallet
+                pass, so you can get into events without paying or being invited.
               </p>
 
               <div className="hero__cta">
@@ -296,6 +424,20 @@ export default function App() {
                   <span>iMessage only</span>
                 </p>
               </div>
+
+              <div className="hero__savings" aria-live="polite">
+                {saved == null ? (
+                  <span
+                    className="hero__savings-fig hero__savings-fig--loading"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <span className="hero__savings-fig">{formatUsd(saved)}</span>
+                )}
+                <span className="hero__savings-label">
+                  saved for members in event fees so far.
+                </span>
+              </div>
             </div>
 
             <div className="hero__phone">
@@ -307,7 +449,9 @@ export default function App() {
           </div>
         </section>
 
-        <MarqueeBar />
+        <SpecStrip />
+
+        <EventCarousel events={mostCopied} />
 
         <Show
           reducedMotionEnabled={reducedMotionEnabled}
@@ -321,17 +465,27 @@ export default function App() {
 
       <footer className="footer">
         <div className="footer__row">
-          <span>© 2026 Keypass</span>
-          <span>San Francisco</span>
-          <span>Built quietly</span>
+          <span className="footer__mark">Keypass</span>
+          <a href="#how" className="footer__link">
+            How it works
+          </a>
+          <a
+            href="https://github.com/zhyguol"
+            className="footer__link"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Repo
+          </a>
+          <span className="footer__year">© 2026</span>
         </div>
         <p className="footer__fine">
           Keypass turns public Luma event pages into Apple Wallet passes over
           iMessage.
         </p>
         {import.meta.env.DEV ? (
-          <p className="footer__fine footer__build" data-build="keypass-cream-v7">
-            Dev · wallet-agent-site · build keypass-cream-v7
+          <p className="footer__build" data-build="keypass-pass-v8">
+            Dev · wallet-agent-site · build keypass-pass-v8
           </p>
         ) : null}
       </footer>

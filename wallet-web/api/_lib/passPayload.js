@@ -1,4 +1,12 @@
+import { normalizeLumaEventUrl } from "./lumaExtract.js";
+
 const REQUIRED = ["eventTitle", "startDateTime", "guestName"];
+
+function qrMessageFor(input) {
+  const normalized = normalizeLumaEventUrl(input?.sourceUrl);
+  if (normalized) return normalized;
+  return `https://example.invalid/test-pass/${Date.now()}`;
+}
 
 export function normalizePayload(input) {
   for (const key of REQUIRED) {
@@ -21,6 +29,6 @@ export function normalizePayload(input) {
     ...input,
     hostOrTicketLabel,
     entryLabel: ticketTypes.length > 1 ? "TICKET" : "HOST",
-    qrMessage: `https://example.invalid/test-pass/${Date.now()}`,
+    qrMessage: qrMessageFor(input),
   };
 }

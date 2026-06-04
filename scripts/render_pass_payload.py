@@ -401,8 +401,8 @@ def main() -> None:
         "organizationName": "Luma",
         "description": event_title,
         "backgroundColor": background,
-        "foregroundColor": "rgb(255, 255, 255)",
-        "labelColor": label_color,
+        "foregroundColor": payload.get("foregroundColor") or "rgb(255, 255, 255)",
+        "labelColor": payload.get("labelColor") or label_color,
         "suppressStripShine": False,
         "eventTicket": {
             "headerFields": [

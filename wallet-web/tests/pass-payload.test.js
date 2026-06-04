@@ -14,7 +14,7 @@ test("forces explicit ticket type choice when multiple exist", () => {
   );
 });
 
-test("sets dummy QR message for generated test passes", () => {
+test("sets dummy QR message when sourceUrl is missing", () => {
   const out = normalizePayload({
     eventTitle: "Demo",
     startDateTime: "2026-06-01T18:00:00-07:00",
@@ -24,6 +24,29 @@ test("sets dummy QR message for generated test passes", () => {
   });
   assert.match(out.qrMessage, /^https:\/\/example\.invalid\//);
   assert.equal(out.hostOrTicketLabel, "Luma Labs");
+});
+
+test("uses Luma sourceUrl for QR when provided", () => {
+  const out = normalizePayload({
+    eventTitle: "Demo",
+    startDateTime: "2026-06-01T18:00:00-07:00",
+    guestName: "Jane",
+    hostName: "Luma Labs",
+    ticketTypes: [],
+    sourceUrl: "https://luma.com/4y89vpyu",
+  });
+  assert.equal(out.qrMessage, "https://luma.com/4y89vpyu");
+});
+
+test("normalizes bare Luma host for QR", () => {
+  const out = normalizePayload({
+    eventTitle: "Demo",
+    startDateTime: "2026-06-01T18:00:00-07:00",
+    guestName: "Jane",
+    ticketTypes: [],
+    sourceUrl: "lu.ma/4y89vpyu",
+  });
+  assert.equal(out.qrMessage, "https://lu.ma/4y89vpyu");
 });
 
 test("sets entry label TICKET when multiple ticket types exist", () => {

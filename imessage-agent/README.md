@@ -181,6 +181,20 @@ You should see: `Starting Luma pass agent — iMessage (Photon Spectrum Cloud)`.
 
 Then text your Photon line (or run `npm run ping -- +1YOURPHONE` locally against the same project) and send a Luma URL.
 
+### Dual Spectrum projects (Pro legacy + Business new users)
+
+When the Pro shared pool is full but you want to keep existing users online:
+
+| Component | Spectrum project | Notes |
+| --- | --- | --- |
+| **Existing Railway worker** | Pro (`243f7bd0-…`) | Leave `PROJECT_ID` / `PROJECT_SECRET` unchanged. Serves current 100 users. |
+| **New Railway worker** | Business (`13a180a3-…`) | Add a **second** Railway service (same repo/Dockerfile). Same signing cert env vars, new Photon credentials. Handles the dedicated business line. |
+| **Landing site (Vercel)** | Business | Set `PROJECT_ID`, `PROJECT_SECRET`, and `AGENT_LINE_PHONE=+16282649132`. New sign-ups register as `dedicated` users on the business line. |
+
+Link the second worker in Railway: **New Service → Deploy from repo → Worker**, then `npx @railway/cli link` and select that service before `bash scripts/railway-deploy.sh`.
+
+Existing users keep texting their old assigned numbers on Pro. New users get the business line from the landing page.
+
 ### Local Docker smoke test
 
 ```bash

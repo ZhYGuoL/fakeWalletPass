@@ -1633,6 +1633,7 @@
         const payload = {
           ...state.extracted,
           ...values,
+          sourceUrl: state.extracted?.sourceUrl || $("luma-url").value.trim(),
           ticketTypes: state.ticketTypes,
         };
 

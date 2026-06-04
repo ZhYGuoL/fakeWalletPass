@@ -8,9 +8,9 @@ import {
 import { TIMELINE } from "./constants";
 import { EASE_IN_OUT, EASE_OUT_EXPO, EASE_OUT_QUART } from "./easing";
 import {
+  ACCENT,
   BUBBLE_RECV,
   BUBBLE_SEND,
-  HONEY,
   MUTED,
   PAPER,
   PAPER_SOFT,
@@ -43,7 +43,7 @@ export function AmbientGlow({ reducedMotionEnabled }) {
       style={{
         position: "absolute",
         inset: 0,
-        background: `radial-gradient(120% 80% at ${x}% ${y}%, oklch(0.78 0.16 78 / 0.18), transparent 60%)`,
+        background: `radial-gradient(120% 80% at ${x}% ${y}%, oklch(0.6 0.16 258 / 0.2), transparent 60%)`,
         zIndex: 0,
       }}
     />
@@ -67,10 +67,10 @@ export function StatusBar() {
         justifyContent: "space-between",
         padding: "14px 30px 0",
         color: PAPER,
-        fontFamily: "Bricolage Grotesque, sans-serif",
-        fontSize: 18,
-        fontWeight: 600,
-        letterSpacing: "0.02em",
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: 17,
+        fontWeight: 500,
+        letterSpacing: "0.01em",
         opacity,
         zIndex: 5,
       }}
@@ -145,15 +145,14 @@ export function ThreadHeader() {
         style={{
           width: 38,
           height: 38,
-          borderRadius: 999,
-          background: `radial-gradient(120% 120% at 30% 20%, ${HONEY}, oklch(0.6 0.14 70))`,
-          color: "oklch(0.16 0.01 60)",
+          borderRadius: 10,
+          background: `linear-gradient(160deg, ${ACCENT}, oklch(0.48 0.16 258))`,
+          color: PAPER,
           display: "grid",
           placeItems: "center",
-          fontFamily: "Spectral, Georgia, serif",
-          fontWeight: 500,
-          fontStyle: "italic",
-          fontSize: 24,
+          fontFamily: "Hanken Grotesk, sans-serif",
+          fontWeight: 800,
+          fontSize: 21,
           lineHeight: 1,
         }}
       >
@@ -163,10 +162,10 @@ export function ThreadHeader() {
         <span
           style={{
             color: PAPER,
-            fontFamily: "Spectral, Georgia, serif",
+            fontFamily: "Hanken Grotesk, sans-serif",
             fontSize: 19,
-            fontWeight: 500,
-            letterSpacing: "-0.005em",
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
           }}
         >
           Keypass
@@ -174,9 +173,9 @@ export function ThreadHeader() {
         <span
           style={{
             color: MUTED,
-            fontFamily: "Bricolage Grotesque, sans-serif",
-            fontSize: 13,
-            letterSpacing: "0.04em",
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: 12.5,
+            letterSpacing: "0.02em",
           }}
         >
           active now
@@ -203,9 +202,9 @@ export function SendBubble({ reducedMotionEnabled }) {
         borderRadius: "22px 22px 6px 22px",
         background: BUBBLE_SEND,
         color: PAPER,
-        fontFamily: "Bricolage Grotesque, sans-serif",
-        fontSize: 16,
-        lineHeight: 1.35,
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: 14.5,
+        lineHeight: 1.4,
         transform: `translateY(${enter}px)`,
         opacity,
         boxShadow: "0 10px 24px oklch(0 0 0 / 0.4)",
@@ -274,7 +273,7 @@ export function ReplyBubble({ reducedMotionEnabled }) {
         borderRadius: "22px 22px 22px 6px",
         background: BUBBLE_RECV,
         color: PAPER,
-        fontFamily: "Bricolage Grotesque, sans-serif",
+        fontFamily: "Hanken Grotesk, sans-serif",
         fontSize: 15.5,
         lineHeight: 1.45,
         transform: `translateY(${enter}px)`,
@@ -296,16 +295,16 @@ export function ReplyBubble({ reducedMotionEnabled }) {
           style={{
             width: `${progress}%`,
             height: "100%",
-            background: HONEY,
+            background: ACCENT,
           }}
         />
       </div>
       <div
         style={{
           marginTop: 8,
-          fontFamily: "Bricolage Grotesque, sans-serif",
-          fontSize: 12,
-          letterSpacing: "0.18em",
+          fontFamily: "IBM Plex Mono, monospace",
+          fontSize: 11,
+          letterSpacing: "0.04em",
           textTransform: "uppercase",
           color: MUTED,
           display: "flex",
@@ -341,33 +340,34 @@ export function PassCard({ reducedMotionEnabled }) {
         padding: 20,
         borderRadius: 22,
         background:
-          "linear-gradient(160deg, oklch(0.97 0.025 82) 0%, oklch(0.86 0.07 64) 55%, oklch(0.72 0.13 56) 100%)",
-        color: "oklch(0.16 0.008 60)",
+          "linear-gradient(160deg, oklch(0.98 0.006 258) 0%, oklch(0.94 0.02 258) 55%, oklch(0.9 0.045 258) 100%)",
+        color: "oklch(0.22 0.01 266)",
         boxShadow:
-          "0 30px 60px oklch(0 0 0 / 0.5), inset 0 0 0 1px oklch(1 0 0 / 0.45)",
+          "0 30px 60px oklch(0 0 0 / 0.5), inset 0 0 0 1px oklch(1 0 0 / 0.5)",
         transform: `translateY(${enter}px) rotate(${tilt}deg)`,
         opacity,
         zIndex: 3,
-        fontFamily: "Bricolage Grotesque, sans-serif",
+        fontFamily: "Hanken Grotesk, sans-serif",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span
           style={{
-            fontFamily: "Spectral, Georgia, serif",
-            fontWeight: 500,
-            fontSize: 22,
-            letterSpacing: "-0.005em",
+            fontFamily: "Hanken Grotesk, sans-serif",
+            fontWeight: 800,
+            fontSize: 21,
+            letterSpacing: "-0.02em",
           }}
         >
           Canopy Festival
         </span>
         <span
           style={{
-            fontSize: 11,
-            letterSpacing: "0.22em",
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: 10.5,
+            letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color: "oklch(0.36 0.02 60)",
+            color: "oklch(0.5 0.16 258)",
           }}
         >
           Wallet
@@ -376,9 +376,10 @@ export function PassCard({ reducedMotionEnabled }) {
       <div
         style={{
           marginTop: 6,
-          fontSize: 13,
-          color: "oklch(0.32 0.01 60)",
-          letterSpacing: "0.04em",
+          fontFamily: "IBM Plex Mono, monospace",
+          fontSize: 12.5,
+          color: "oklch(0.44 0.012 266)",
+          letterSpacing: "0.01em",
         }}
       >
         Sat · May 23 · 8:00 PM
@@ -396,10 +397,11 @@ export function PassCard({ reducedMotionEnabled }) {
         <div>
           <div
             style={{
+              fontFamily: "IBM Plex Mono, monospace",
               fontSize: 10,
-              letterSpacing: "0.22em",
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "oklch(0.36 0.02 60)",
+              color: "oklch(0.46 0.014 266)",
             }}
           >
             Guest
@@ -409,10 +411,11 @@ export function PassCard({ reducedMotionEnabled }) {
         <div>
           <div
             style={{
+              fontFamily: "IBM Plex Mono, monospace",
               fontSize: 10,
-              letterSpacing: "0.22em",
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "oklch(0.36 0.02 60)",
+              color: "oklch(0.46 0.014 266)",
             }}
           >
             Pass
@@ -426,7 +429,7 @@ export function PassCard({ reducedMotionEnabled }) {
           marginTop: 18,
           height: 86,
           borderRadius: 14,
-          background: "oklch(0.99 0.005 80)",
+          background: "oklch(0.99 0.004 266)",
           padding: 10,
           display: "grid",
           gridTemplateColumns: "86px 1fr",
@@ -440,26 +443,40 @@ export function PassCard({ reducedMotionEnabled }) {
             height: 66,
             borderRadius: 8,
             background:
-              "repeating-conic-gradient(oklch(0.12 0.006 60) 0 25%, oklch(0.99 0.005 80) 0 50%)",
+              "repeating-conic-gradient(oklch(0.18 0.01 266) 0 25%, oklch(0.99 0.004 266) 0 50%)",
             backgroundSize: "8px 8px",
-            border: "1px solid oklch(0.86 0.01 60)",
+            border: "1px solid oklch(0.86 0.008 266)",
           }}
         />
         <div style={{ display: "grid", gap: 4 }}>
           <span
             style={{
+              fontFamily: "IBM Plex Mono, monospace",
               fontSize: 10,
-              letterSpacing: "0.22em",
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "oklch(0.45 0.012 60)",
+              color: "oklch(0.48 0.012 266)",
             }}
           >
             QR code
           </span>
-          <span style={{ fontSize: 13, color: "oklch(0.18 0.008 60)", fontWeight: 500 }}>
+          <span
+            style={{
+              fontFamily: "IBM Plex Mono, monospace",
+              fontSize: 12.5,
+              color: "oklch(0.44 0.14 258)",
+              fontWeight: 500,
+            }}
+          >
             keypass.app/canopy/01
           </span>
-          <span style={{ fontSize: 11, color: "oklch(0.45 0.012 60)" }}>
+          <span
+            style={{
+              fontFamily: "IBM Plex Mono, monospace",
+              fontSize: 11,
+              color: "oklch(0.48 0.012 266)",
+            }}
+          >
             Present at entry
           </span>
         </div>
@@ -468,16 +485,17 @@ export function PassCard({ reducedMotionEnabled }) {
       <div
         style={{
           marginTop: 14,
-          padding: "10px 14px",
-          borderRadius: 999,
-          background: "oklch(0.16 0.008 60)",
+          padding: "11px 14px",
+          borderRadius: 10,
+          background: "oklch(0.2 0.012 266)",
           color: PAPER,
+          fontFamily: "Hanken Grotesk, sans-serif",
           fontSize: 13,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          textTransform: "none",
           textAlign: "center",
-          boxShadow: "inset 0 0 0 1px oklch(0.82 0.15 78 / 0.4)",
+          boxShadow: "inset 0 0 0 1px oklch(0.62 0.16 258 / 0.5)",
         }}
       >
         Add to Apple Wallet
@@ -513,7 +531,7 @@ export function PhoneToPass({ reducedMotionEnabled = false }) {
     <AbsoluteFill
       style={{
         background: `linear-gradient(180deg, ${SCREEN_BG_TOP}, ${SCREEN_BG})`,
-        fontFamily: "Bricolage Grotesque, sans-serif",
+        fontFamily: "Hanken Grotesk, sans-serif",
         overflow: "hidden",
       }}
     >
