@@ -1,22 +1,28 @@
 /**
  * Private admin backend for the ticket tracker.
  *
- *   GET  /api/admin-events?ui=1   → the admin dashboard HTML (gated)
- *   GET  /api/admin-events        → JSON list of every tracked event
- *   POST /api/admin-events        → mutate the store
+ *   GET  /api/admin-events?ui=1   -> dashboard (if logged in) or login page
+ *   GET  /api/admin-events        -> JSON list of events (session required)
+ *   POST /api/admin-events        -> { action } mutations (session required),
+ *                                    plus { action: "login", password }
  *
- * Every response to an UNAUTHORIZED caller is a bare 404, so neither the
- * endpoint nor the admin concept is discoverable by probing. Auth is via a
- * one-time `?token=` secret link (which sets a session cookie) or the
- * `x-admin-token` header. Locked in production unless ADMIN_TOKEN is set.
- *
- * POST actions:
- *   { action: "upsert", event: {...} } | { action: "setCount", slug, ticketsCreated }
- *   { action: "delete", slug }         | { action: "reseed" }
+ * Auth is a password login that mints an HMAC-signed HttpOnly session cookie
+ * (see ./_lib/admin-auth.js). The password never appears in a URL, failed
+ * logins are rate-limited per IP with lockout, and unauthorized data/UI
+ * requests return a bare 404 so nothing is discoverable.
  */
 
-import { isAuthorized, notFound, sessionCookie } from "./_lib/admin-auth.js";
-import { ADMIN_HTML } from "./_lib/admin-ui.js";
+import {
+  clearFailures,
+  clientIp,
+  hasValidSession,
+  isLockedOut,
+  notFound,
+  passwordMatches,
+  recordFailure,
+  sessionSetCookie,
+} from "./_lib/admin-auth.js";
+import { ADMIN_HTML, LOGIN_HTML } from "./_lib/admin-ui.js";
 import {
   deleteEvent,
   loadEvents,
@@ -25,32 +31,36 @@ import {
   upsertEvent,
 } from "./_lib/events.js";
 
-function json(body, status = 200) {
+function json(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extraHeaders },
+  });
+}
+
+function html(body, extraHeaders = {}) {
+  return new Response(body, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Robots-Tag": "noindex, nofollow",
+      ...extraHeaders,
+    },
   });
 }
 
 export async function GET(request) {
   const url = new URL(request.url);
-  if (!isAuthorized(request, url)) return notFound();
+  const loggedIn = hasValidSession(request);
 
-  // Serve the dashboard UI.
+  // The UI is the only surface an anonymous visitor may see, and only as a
+  // bare login prompt — never revealing data.
   if (url.searchParams.has("ui")) {
-    const headers = {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store",
-      "X-Robots-Tag": "noindex, nofollow",
-    };
-    // If unlocked via the secret link, drop a session cookie so the token
-    // can leave the URL and reloads keep working.
-    const tokenInUrl = url.searchParams.get("token");
-    if (tokenInUrl && process.env.ADMIN_TOKEN?.trim()) {
-      headers["Set-Cookie"] = sessionCookie(tokenInUrl);
-    }
-    return new Response(ADMIN_HTML, { status: 200, headers });
+    return loggedIn ? html(ADMIN_HTML) : html(LOGIN_HTML);
   }
+
+  if (!loggedIn) return notFound();
 
   const events = await loadEvents();
   events.sort((a, b) => b.ticketsCreated - a.ticketsCreated || a.name.localeCompare(b.name));
@@ -64,12 +74,25 @@ export async function POST(request) {
   try {
     payload = await request.json();
   } catch {
-    // Don't reveal shape to unauthenticated callers.
-    if (!isAuthorized(request, url)) return notFound();
+    if (!hasValidSession(request)) return notFound();
     return json({ error: "Invalid JSON body." }, 400);
   }
 
-  if (!isAuthorized(request, url, payload?.token)) return notFound();
+  // Login is the one action allowed without a session.
+  if (payload?.action === "login") {
+    const ip = clientIp(request);
+    if (isLockedOut(ip)) {
+      return json({ error: "Too many attempts. Try again in 15 minutes." }, 429);
+    }
+    if (!passwordMatches(payload.password)) {
+      recordFailure(ip);
+      return json({ error: "Incorrect password." }, 401);
+    }
+    clearFailures(ip);
+    return json({ ok: true }, 200, { "Set-Cookie": sessionSetCookie() });
+  }
+
+  if (!hasValidSession(request)) return notFound();
 
   const action = String(payload?.action || "").trim();
   try {

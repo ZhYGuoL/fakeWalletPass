@@ -123,3 +123,36 @@ load();
 </script>
 </body>
 </html>`;
+
+// Login page: password posts in a form body (never in a URL) and, on success,
+// the server sets the session cookie so the dashboard loads on reload.
+export const LOGIN_HTML = `<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" /><title>Sign in</title>
+<style>
+:root{--bg:#fff;--bg2:#fafafa;--border:#d9d9d9;--fg:#171717;--muted:#8f8f8f;--accent:#006bff;--danger:#e5484d;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--bg2:#0e0e0e;--border:#333;--fg:#ededed;--muted:#7d7d7d;--accent:#3b9dff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);display:grid;place-items:center;min-height:100vh}
+.card{width:min(92vw,340px);border:1px solid var(--border);border-radius:14px;background:var(--bg2);padding:24px}
+h1{font-size:1.1rem;margin:0 0 4px}p{color:var(--muted);font-size:.85rem;margin:0 0 18px}
+input{width:100%;height:42px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+button{width:100%;height:42px;margin-top:12px;border:0;border-radius:8px;background:var(--fg);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}.err{color:var(--danger);font-size:.82rem;margin-top:10px;min-height:1em}
+</style></head><body>
+<form class="card" id="f">
+<h1>Ticket Tracker</h1><p>Enter the admin password.</p>
+<input id="pw" type="password" autocomplete="current-password" placeholder="Password" autofocus />
+<button id="b" type="submit">Sign in</button>
+<div class="err" id="e"></div>
+</form>
+<script>
+var f=document.getElementById('f'),pw=document.getElementById('pw'),b=document.getElementById('b'),e=document.getElementById('e');
+f.addEventListener('submit',async function(ev){ev.preventDefault();b.disabled=true;e.textContent='';
+try{var r=await fetch('/api/admin-events',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({action:'login',password:pw.value})});
+var d=await r.json().catch(function(){return{};});
+if(r.ok){location.href='/api/admin-events?ui=1';return;}
+e.textContent=d.error||('Error '+r.status);}catch(x){e.textContent='Network error';}
+b.disabled=false;pw.value='';pw.focus();});
+</script></body></html>`;

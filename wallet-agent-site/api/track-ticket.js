@@ -15,8 +15,15 @@
  *   - name/host/location/status: metadata used only when auto-creating.
  */
 
-import { isAuthorized, notFound } from "./_lib/admin-auth.js";
+import { isProduction, notFound, passwordMatches } from "./_lib/admin-auth.js";
 import { deriveSlug, incrementCount } from "./_lib/events.js";
+
+// Server-to-server hook: the agent sends the admin secret as `x-admin-token`.
+function agentAuthorized(request, bodyToken) {
+  const token = request.headers.get("x-admin-token") || bodyToken || "";
+  if (process.env.ADMIN_TOKEN?.trim()) return passwordMatches(token);
+  return !isProduction();
+}
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -26,17 +33,15 @@ function json(body, status = 200) {
 }
 
 export async function POST(request) {
-  const url = new URL(request.url);
-
   let payload;
   try {
     payload = await request.json();
   } catch {
-    if (!isAuthorized(request, url)) return notFound();
+    if (!agentAuthorized(request)) return notFound();
     return json({ error: "Invalid JSON body." }, 400);
   }
 
-  if (!isAuthorized(request, url, payload?.token)) return notFound();
+  if (!agentAuthorized(request, payload?.token)) return notFound();
 
   const eventUrl = String(payload?.url || "").trim();
   const slug = payload?.slug ? String(payload.slug).trim() : deriveSlug(eventUrl);
