@@ -1,5 +1,5 @@
 /**
- * GET /api/export-waitlist — list waitlisted phone numbers (admin only).
+ * GET /api/export-waitlist - list waitlisted phone numbers (admin only).
  * Set WAITLIST_EXPORT_SECRET in Vercel env, then:
  *   curl -H "Authorization: Bearer $SECRET" https://keypass.zygl.dev/api/export-waitlist
  */

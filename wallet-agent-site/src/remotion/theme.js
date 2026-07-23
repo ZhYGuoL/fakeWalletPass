@@ -1,9 +1,0 @@
-export const SCREEN_BG = "oklch(0.16 0.012 266)";
-export const SCREEN_BG_TOP = "oklch(0.2 0.014 266)";
-export const PAPER = "oklch(0.96 0.006 266)";
-export const PAPER_SOFT = "oklch(0.82 0.01 266)";
-export const MUTED = "oklch(0.64 0.012 266)";
-export const RULE = "oklch(0.36 0.012 266)";
-export const BUBBLE_RECV = "oklch(0.26 0.012 266)";
-export const BUBBLE_SEND = "oklch(0.55 0.17 258)";
-export const ACCENT = "oklch(0.64 0.16 258)";

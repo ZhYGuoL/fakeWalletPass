@@ -11,12 +11,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@remotion/player": "^4.0.465",
     "@vercel/blob": "^2.4.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "remotion": "^4.0.465"
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

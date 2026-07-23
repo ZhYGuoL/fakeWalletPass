@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Local dev — Vite HMR + /api/* handlers (same as Vercel serverless).
+ * Local dev - Vite HMR + /api/* handlers (same as Vercel serverless).
  */
 import { createServer as createHttpServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
@@ -30,6 +30,9 @@ loadDotEnv();
 const API_ROUTES = {
   "POST /api/register-agent": () => import("./api/register-agent.js"),
   "GET /api/stats": () => import("./api/stats.js"),
+  "POST /api/track-ticket": () => import("./api/track-ticket.js"),
+  "GET /api/admin-events": () => import("./api/admin-events.js"),
+  "POST /api/admin-events": () => import("./api/admin-events.js"),
 };
 
 function readBody(req) {
@@ -45,9 +48,6 @@ const vite = await createViteServer({
   root: ROOT,
   server: { middlewareMode: true },
   appType: "spa",
-  optimizeDeps: {
-    include: ["remotion", "@remotion/player"],
-  },
 });
 
 const server = createHttpServer(async (req, res) => {
@@ -92,8 +92,10 @@ const server = createHttpServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`Keypass landing: http://127.0.0.1:${PORT}`);
+// Bind on the unspecified address so both `localhost` (IPv6 ::1) and
+// 127.0.0.1 (IPv4) reach this server — macOS resolves localhost to ::1 first.
+server.listen(PORT, () => {
+  console.log(`Keypass landing: http://localhost:${PORT}`);
   console.log("Press Ctrl+C to stop.");
 });
 

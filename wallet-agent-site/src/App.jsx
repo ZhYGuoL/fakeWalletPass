@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AgentRegisterModal } from "./AgentRegisterModal";
 import { HeroPhone } from "./HeroPhone";
 import { HeroQrCode } from "./HeroQrCode";
-import { RemotionProcess, RemotionProcessPlaceholder } from "./RemotionProcess";
+import { Pipeline, PipelinePlaceholder } from "./Pipeline";
 import { PlayerErrorBoundary } from "./PlayerErrorBoundary";
 
 function useReducedMotionPreference() {
@@ -136,34 +136,50 @@ function formatUsd(amount) {
   });
 }
 
-// Pulls metrics from /api/stats once on load. No figures are baked into the
-// bundle; the displayed value is whatever the server returns at fetch time.
+// Pulls metrics from /api/stats. No figures are baked into the bundle; the
+// displayed value is whatever the server returns at fetch time. Retries with
+// backoff so a single failed load (e.g. a dev-server restart) can't strand the
+// leaderboard on skeletons.
 function useLiveStats() {
   const [saved, setSaved] = useState(null);
-  const [mostCopied, setMostCopied] = useState(null);
+  const [events, setEvents] = useState(null);
 
   useEffect(() => {
     let alive = true;
+    let attempt = 0;
+    let timer;
 
-    (async () => {
+    const pull = async () => {
       try {
-        const res = await fetch("/api/stats", { cache: "no-store" });
-        if (!res.ok) return;
+        const res = await fetch(`/api/stats?t=${Date.now()}`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!alive) return;
         if (typeof data?.saved?.amount === "number") setSaved(data.saved.amount);
-        if (Array.isArray(data?.mostCopied)) setMostCopied(data.mostCopied);
+        const list = data?.events ?? data?.mostCopied;
+        if (Array.isArray(list) && list.length > 0) {
+          setEvents(list);
+          return;
+        }
+        throw new Error("no events in response");
       } catch {
-        // leave skeletons in place if the fetch fails
+        if (!alive) return;
+        attempt += 1;
+        if (attempt <= 8) {
+          timer = window.setTimeout(pull, Math.min(3000, 400 * attempt));
+        }
       }
-    })();
+    };
+
+    pull();
 
     return () => {
       alive = false;
+      window.clearTimeout(timer);
     };
   }, []);
 
-  return { saved, mostCopied };
+  return { saved, events };
 }
 
 function EventCarousel({ events }) {
@@ -181,8 +197,8 @@ function EventCarousel({ events }) {
     <section id="sneak" className="sneak">
       <header className="sneak__head">
         <div className="sneak__intro">
-          <p className="kicker kicker--accent">Most copied this week</p>
-          <h2 className="display display--md">See where people are sneaking into.</h2>
+          <p className="kicker kicker--accent">Tickets created · YC Startup School</p>
+          <h2 className="display display--md">See where founders are getting in.</h2>
         </div>
         <div className="sneak__nav">
           <button
@@ -217,7 +233,7 @@ function EventCarousel({ events }) {
                   <div className="sneak__card-top">
                     <span className="sneak__rank">{evt.rank}</span>
                     <span className="sneak__copied">
-                      {evt.copied.toLocaleString("en-US")}&times; copied
+                      {(evt.ticketsCreated ?? evt.copied ?? 0).toLocaleString("en-US")} tickets
                     </span>
                   </div>
                   <h3 className="sneak__name">{evt.name}</h3>
@@ -339,15 +355,15 @@ function Show({ reducedMotionEnabled, pagePhase, showRef, showSeen }) {
         </div>
 
         <div className="show__viz-wrap">
-          <PlayerErrorBoundary fallback={<RemotionProcessPlaceholder />}>
+          <PlayerErrorBoundary fallback={<PipelinePlaceholder />}>
             {showSeen ? (
-              <RemotionProcess
+              <Pipeline
                 phase={ACTS[active].act}
                 reducedMotionEnabled={reducedMotionEnabled}
                 active={processActive}
               />
             ) : (
-              <RemotionProcessPlaceholder />
+              <PipelinePlaceholder />
             )}
           </PlayerErrorBoundary>
           <p className="show__viz-cap">{active + 1} / 3 · Keypass</p>
@@ -363,7 +379,7 @@ export default function App() {
   const [showRef, showSeen] = useReveal();
   const pagePhase = usePagePhase(heroRef);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const { saved, mostCopied } = useLiveStats();
+  const { saved, events } = useLiveStats();
 
   return (
     <div className="page">
@@ -416,14 +432,17 @@ export default function App() {
                     ↗
                   </span>
                 </button>
-                <p className="cta__meta hero__meta">
-                  <span>Register your phone to get a line</span>
-                  <span className="cta__meta-dot" aria-hidden="true">
-                    ·
-                  </span>
-                  <span>iMessage only</span>
-                </p>
+                <a href="#how" className="cta__button cta__button--ghost">
+                  <span className="cta__button-label">How it works</span>
+                </a>
               </div>
+              <p className="cta__meta hero__meta">
+                <span>Register your phone to get a line</span>
+                <span className="cta__meta-dot" aria-hidden="true">
+                  ·
+                </span>
+                <span>iMessage only</span>
+              </p>
 
               <div className="hero__savings" aria-live="polite">
                 {saved == null ? (
@@ -451,7 +470,7 @@ export default function App() {
 
         <SpecStrip />
 
-        <EventCarousel events={mostCopied} />
+        <EventCarousel events={events} />
 
         <Show
           reducedMotionEnabled={reducedMotionEnabled}

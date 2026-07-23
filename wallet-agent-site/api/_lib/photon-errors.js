@@ -18,5 +18,5 @@ export function isUserCapacityError(message, status) {
 export const WAITLIST_USER_MESSAGE = [
   "Keypass has reached its user limit for now.",
   "",
-  "You're on the waitlist — we'll add you as soon as we upgrade the service.",
+  "You're on the waitlist - we'll add you as soon as we upgrade the service.",
 ].join("\n");

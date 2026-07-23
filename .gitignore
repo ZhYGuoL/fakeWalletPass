@@ -12,3 +12,11 @@ pass/.env
 # Tooling
 .venv/
 .DS_Store
+
+# generated pass artifacts + python cache
+build/*.pkpass
+build/*payload*.json
+build/payloads/
+__pycache__/
+imessage-agent/data/
+railway-spectrum-kit/

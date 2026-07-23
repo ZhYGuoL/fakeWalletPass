@@ -1,5 +1,5 @@
 /**
- * POST /api/register-agent — register a Spectrum user (Photon Cloud).
+ * POST /api/register-agent - register a Spectrum user (Photon Cloud).
  * Proxies Photon credentials server-side; never expose PROJECT_SECRET to the client.
  *
  * When AGENT_LINE_PHONE is set (Business dedicated line), new users are registered

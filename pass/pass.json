@@ -2,20 +2,20 @@
   "formatVersion": 1,
   "passTypeIdentifier": "pass.pass.com.zhiyuanguo.walletpasses",
   "teamIdentifier": "N4GAW5JL9A",
-  "serialNumber": "MYTHOS-2026-INV-001-a15a7d98bc35-4a220de6417b-fd34c97b0907-74ce7e556417-528a52bcac80-f735bc1d385a-70f443d5c6f8-8117c52c2069-647c6259435a-ee10d3a500c8-69cb61cf3d33-33ec300a7fee-08ea70907475-410f7e480f8e-842240aff56a-c49a63a9d8fa-8b76f904b4c6-b03dc7c04112-08b727a9a634-c3d709463a32-7f0495f094ea-3c1dd2ec1139-72c003b49644-c188f248325f-93c1e7e386d9-2fa0d7912618-ded9eb680b55-c4b8ca22354c-0b242d2f7c40-ce3373226b85-cd93b2deb375-89bbe285ceef-56d693d07dfa-7b71847b86ad-858612b384f7-4432cafb7f4f-07309a527889-9cfca99f4385-71891d42aac5-77b5212441da-445b496c0a5b-0d2d325392ed-cb0188f52454-44883477af46-449d1f67e695-7acb04e75ab3-5f4249c8c1a5-682745ac4b7b-b6e4885f384f",
+  "serialNumber": "MYTHOS-2026-INV-001-a15a7d98bc35-4a220de6417b-fd34c97b0907-74ce7e556417-528a52bcac80-f735bc1d385a-70f443d5c6f8-8117c52c2069-647c6259435a-ee10d3a500c8-69cb61cf3d33-33ec300a7fee-08ea70907475-410f7e480f8e-842240aff56a-c49a63a9d8fa-8b76f904b4c6-b03dc7c04112-08b727a9a634-c3d709463a32-7f0495f094ea-3c1dd2ec1139-72c003b49644-c188f248325f-93c1e7e386d9-2fa0d7912618-ded9eb680b55-c4b8ca22354c-0b242d2f7c40-ce3373226b85-cd93b2deb375-89bbe285ceef-56d693d07dfa-7b71847b86ad-858612b384f7-4432cafb7f4f-07309a527889-9cfca99f4385-71891d42aac5-77b5212441da-445b496c0a5b-0d2d325392ed-cb0188f52454-44883477af46-449d1f67e695-7acb04e75ab3-5f4249c8c1a5-682745ac4b7b-b6e4885f384f-1f5e60640d79-c2518deddc0f-5e3cbdea82d5-7a2ec988d8ca-10dfed58f6ee-1d7d05591d5d",
   "organizationName": "Luma",
-  "description": "OpenClaw: After Hours @ GitHub",
-  "backgroundColor": "rgb(242, 242, 241)",
-  "foregroundColor": "rgb(26, 26, 26)",
-  "labelColor": "rgb(99, 97, 95)",
+  "description": "Tavus x Y Combinator | Startup School Afterparty",
+  "backgroundColor": "rgb(51, 0, 4)",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "labelColor": "rgb(249, 187, 159)",
   "suppressStripShine": false,
   "eventTicket": {
     "headerFields": [
       {
         "key": "datetime",
-        "label": "5:15 PM",
+        "label": "6:00 PM",
         "textAlignment": "PKTextAlignmentRight",
-        "value": "2026-06-04T00:15:00.000Z",
+        "value": "2026-07-26T01:00:00.000Z",
         "dateStyle": "PKDateStyleMedium",
         "timeStyle": "PKDateStyleNone",
         "isRelative": false
@@ -25,26 +25,26 @@
       {
         "key": "event",
         "label": "",
-        "value": "OpenClaw: After Hours @ GitHub"
+        "value": "Tavus x Y Combinator | Startup School Afterparty"
       }
     ],
     "secondaryFields": [
       {
         "key": "location",
         "label": "LOCATION",
-        "value": "San Francisco, CA"
+        "value": "Tavus"
       }
     ],
     "auxiliaryFields": [
       {
         "key": "guest",
         "label": "GUEST",
-        "value": "Tony Nguyen"
+        "value": "Zhiyuan Guo"
       },
       {
         "key": "entry",
         "label": "HOST",
-        "value": "GitHub",
+        "value": "Tavus Events",
         "textAlignment": "PKTextAlignmentRight"
       }
     ]
@@ -52,13 +52,13 @@
   "barcodes": [
     {
       "format": "PKBarcodeFormatQR",
-      "message": "https://luma.com/check-in/evt-vQd1nUEhZ5lJOXU?pk=g-qGgtJFMZvmKniom",
+      "message": "https://luma.com/tavus-jv2v",
       "messageEncoding": "iso-8859-1"
     }
   ],
   "barcode": {
     "format": "PKBarcodeFormatQR",
-    "message": "https://luma.com/check-in/evt-vQd1nUEhZ5lJOXU?pk=g-qGgtJFMZvmKniom",
+    "message": "https://luma.com/tavus-jv2v",
     "messageEncoding": "iso-8859-1"
   }
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import colorsys
 import json
 import re
 import uuid
@@ -108,83 +109,52 @@ def _is_light_background(background: str) -> bool:
     return _luminance(*rgb) >= LIGHT_BG_LUMINANCE
 
 
-def _is_accent_label(hex_color: str) -> bool:
-    """Bright saturated accent (e.g. Canopy Festival neon green labels)."""
-    r, g, b = _hex_to_rgb(hex_color)
-    lum = _luminance(r, g, b)
-    max_c = max(r, g, b)
-    min_c = min(r, g, b)
-    saturation = 0 if max_c == 0 else (max_c - min_c) / max_c
-    return lum >= 120 and saturation >= 0.5
-
-
-def _is_neon_accent(hex_color: str) -> bool:
-    """Neon label accents (green/orange) — not cover blues used as pass backgrounds."""
-    if not _is_accent_label(hex_color):
-        return False
-    r, g, b = _hex_to_rgb(hex_color)
-    return not (b >= max(r, g) * 0.92 and b > 80)
-
-
 def _top_palette_color(colors: list[dict] | None) -> dict | None:
     if not colors:
         return None
     return max(colors, key=lambda entry: entry.get("percentage", 0))
 
 
-def _pass_background_rgb(r: int, g: int, b: int) -> tuple[int, int, int]:
-    """Snap near-black to pure black; darken light cover colors for Wallet contrast."""
-    if _luminance(r, g, b) < 15:
-        return 0, 0, 0
-    if _luminance(r, g, b) >= 128:
-        return (
-            _safe_int(r * 0.55),
-            _safe_int(g * 0.65),
-            _safe_int(b * 0.77),
-        )
-    return r, g, b
+# Reverse-engineered from 8 real Luma-generated passes. Every color is computed
+# from the cover palette by holding hue+saturation and remapping only HSL
+# lightness:
+#   - background = highest-percentage swatch (any bucket), lightness clamped to
+#     [10%, 40%]: darken if too light for white text, lift if near-black.
+#     Exactly reproduces #ededed->#666666, #0d0001->#330004, #002400->#003300.
+#   - label     = lightness fixed at 80%; the hue/saturation come from the top
+#     vibrant swatch ONLY when it is a genuine accent (present >=3% AND
+#     lightness >=35%), otherwise from the lightest-covering neutral. This is
+#     why some passes get a colored label (#be2020->#f0a8a8, #f26625->#f9bb9f)
+#     and others a grey/cream one (#ffffff->#cccccc, #ede2cb->#e5d5b3): a rare
+#     (Marketing 0.12%, JacHacks 0.91%) or too-dark (The View L=26%) vibrant is
+#     rejected in favor of the neutral.
+#   - foreground = white (backgrounds always land dark).
+BG_MIN_LIGHTNESS = 0.10
+BG_MAX_LIGHTNESS = 0.40
+LABEL_LIGHTNESS = 0.80
+# A vibrant swatch is used for the label only if it is a real accent.
+VIBRANT_LABEL_MIN_PCT = 3.0
+VIBRANT_LABEL_MIN_LIGHTNESS = 0.35
+# A neutral must be at least this light to serve as a label base.
+NEUTRAL_LABEL_MIN_LIGHTNESS = 0.30
 
 
-def _default_label_on_background(bg_rgb: tuple[int, int, int]) -> str:
-    lum = _luminance(*bg_rgb)
-    if 35 <= lum <= 130:
-        return "rgb(200, 200, 200)"
-    return "rgb(160, 160, 160)"
+def _hex_to_hsl(hex_color: str) -> tuple[float, float, float]:
+    r, g, b = _hex_to_rgb(hex_color)
+    h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+    return h, s, l
 
 
-def _lightest_neutral_label(palette: dict) -> str:
-    """Muted label grey from the cover's light neutral swatch (matches real Luma passes)."""
-    best_hex = None
-    best_lum = -1.0
-    for entry in palette.get("neutral") or []:
-        color = entry.get("color")
-        if not color or _is_dark_bg(color):
-            continue
-        r, g, b = _hex_to_rgb(color)
-        lum = _luminance(r, g, b)
-        if lum > 220:
-            continue
-        if lum > best_lum:
-            best_lum = lum
-            best_hex = color
-    if best_hex:
-        r, g, b = _hex_to_rgb(best_hex)
-        return _rgb_string(r, g, b)
-    return "rgb(160, 160, 160)"
-
-
-ACCENT_LABEL_MIN_PCT = 10.0
+def _hsl_to_rgb_string(h: float, s: float, l: float) -> str:
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    return _rgb_string(_safe_int(r * 255), _safe_int(g * 255), _safe_int(b * 255))
 
 
 def colors_from_luma_palette(palette: dict | None) -> tuple[str | None, str | None]:
     """
-    Luma stores cover-image palette in __NEXT_DATA__ at data.cover_image.palette
-    (neutral + vibrant buckets with percentage weights). Real passes use this,
-    not a simple average of the thumbnail pixels.
-
-    Background: dominant dark neutral when it beats vibrant share; else top dark vibrant.
-    Labels: top vibrant only when it is a strong accent (e.g. Canopy Festival green);
-    otherwise the light neutral grey from the cover palette.
+    Derive (backgroundColor, labelColor) from Luma's cover-image palette, stored
+    in __NEXT_DATA__ at data.cover_image.palette (neutral + vibrant buckets with
+    percentage weights). See the notes above for the exact remapping.
     """
     if not palette:
         return None, None
@@ -192,39 +162,47 @@ def colors_from_luma_palette(palette: dict | None) -> tuple[str | None, str | No
     neutral = _top_palette_color(palette.get("neutral"))
     vibrant = _top_palette_color(palette.get("vibrant"))
 
-    background_hex = None
-    if neutral and vibrant:
-        n_pct = neutral.get("percentage", 0)
-        v_pct = vibrant.get("percentage", 0)
-        n_color = neutral.get("color")
-        v_color = vibrant.get("color")
-        if n_color and n_pct > v_pct and _is_dark_bg(n_color):
-            background_hex = n_color
-        elif v_color and _is_dark_bg(v_color):
-            background_hex = v_color
-        elif n_color and _is_dark_bg(n_color):
-            background_hex = n_color
-        elif v_color:
-            background_hex = v_color
-    elif neutral and neutral.get("color"):
-        background_hex = neutral["color"]
-    elif vibrant and vibrant.get("color"):
-        background_hex = vibrant["color"]
+    # Background: the swatch that covers the most of the cover (whichever bucket),
+    # lightness clamped into the dark band that keeps white text legible.
+    bg_candidates = [c for c in (neutral, vibrant) if c and c.get("color")]
+    background = None
+    if bg_candidates:
+        bg_source = max(bg_candidates, key=lambda c: c.get("percentage", 0))["color"]
+        h, s, l = _hex_to_hsl(bg_source)
+        l = min(BG_MAX_LIGHTNESS, max(BG_MIN_LIGHTNESS, l))
+        background = _hsl_to_rgb_string(h, s, l)
 
-    label_color = _lightest_neutral_label(palette)
+    # Label hue/saturation source: a genuine vibrant accent, else the neutral
+    # that covers the most area while still being light enough to read.
+    label_source = None
     if vibrant and vibrant.get("color"):
-        pct = vibrant.get("percentage", 0)
-        if pct >= ACCENT_LABEL_MIN_PCT and _is_neon_accent(vibrant["color"]):
-            r, g, b = _hex_to_rgb(vibrant["color"])
-            label_color = _rgb_string(r, g, b)
+        _h, _s, v_l = _hex_to_hsl(vibrant["color"])
+        if (
+            vibrant.get("percentage", 0) >= VIBRANT_LABEL_MIN_PCT
+            and v_l >= VIBRANT_LABEL_MIN_LIGHTNESS
+        ):
+            label_source = vibrant["color"]
 
-    if background_hex:
-        bg_rgb = _pass_background_rgb(*_hex_to_rgb(background_hex))
-        if label_color == "rgb(160, 160, 160)":
-            label_color = _default_label_on_background(bg_rgb)
-        r, g, b = bg_rgb
-        return _rgb_string(r, g, b), label_color
-    return None, label_color
+    if label_source is None:
+        light_neutrals = [
+            entry
+            for entry in (palette.get("neutral") or [])
+            if entry.get("color")
+            and _hex_to_hsl(entry["color"])[2] >= NEUTRAL_LABEL_MIN_LIGHTNESS
+        ]
+        if light_neutrals:
+            label_source = max(
+                light_neutrals, key=lambda e: e.get("percentage", 0)
+            )["color"]
+        elif neutral and neutral.get("color"):
+            label_source = neutral["color"]
+
+    label_color = None
+    if label_source:
+        h, s, _l = _hex_to_hsl(label_source)
+        label_color = _hsl_to_rgb_string(h, s, LABEL_LIGHTNESS)
+
+    return background, label_color
 
 
 def _average_rgb(image: Image.Image) -> tuple[int, int, int]:
