@@ -16,13 +16,15 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const LOCAL_PATH = join(process.cwd(), "data", "events.json");
+// On read-only serverless filesystems (Vercel) only /tmp is writable.
+const LOCAL_DIR = process.env.VERCEL === "1" ? "/tmp" : join(process.cwd(), "data");
+const LOCAL_PATH = join(LOCAL_DIR, "events.json");
 const BLOB_KEY = "events/events.json";
 
+// Blob is only usable when the SDK's read/write token is actually present.
+// (BLOB_STORE_ID alone can't authenticate calls, so it must not count.)
 export function hasBlobStorage() {
-  return Boolean(
-    process.env.BLOB_READ_WRITE_TOKEN?.trim() || process.env.BLOB_STORE_ID?.trim(),
-  );
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
 }
 
 /**
@@ -389,14 +391,24 @@ async function writeBlob(events) {
 }
 
 async function readStore() {
-  return hasBlobStorage() ? readBlob() : readLocal();
+  try {
+    return hasBlobStorage() ? await readBlob() : await readLocal();
+  } catch {
+    // A storage failure must never take down the read path.
+    return null;
+  }
 }
 
 async function writeStore(events) {
-  return hasBlobStorage() ? writeBlob(events) : writeLocal(events);
+  try {
+    return hasBlobStorage() ? await writeBlob(events) : await writeLocal(events);
+  } catch {
+    // Best-effort persistence; the seeded/in-memory data is still served.
+    return undefined;
+  }
 }
 
-/** All events, self-seeding on first read. Unsorted (storage order). */
+/** All events, self-seeding on first read. Never throws. */
 export async function loadEvents() {
   let events = await readStore();
   if (!events || events.length === 0) {
