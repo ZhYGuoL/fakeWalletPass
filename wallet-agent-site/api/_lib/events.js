@@ -21,10 +21,13 @@ const LOCAL_DIR = process.env.VERCEL === "1" ? "/tmp" : join(process.cwd(), "dat
 const LOCAL_PATH = join(LOCAL_DIR, "events.json");
 const BLOB_KEY = "events/events.json";
 
-// Blob is only usable when the SDK's read/write token is actually present.
-// (BLOB_STORE_ID alone can't authenticate calls, so it must not count.)
+// Use Blob whenever a store is linked. On Vercel the read/write token is
+// injected at runtime for the connected store even when it isn't listed in the
+// env; BLOB_STORE_ID being present is a reliable signal that it's linked.
 export function hasBlobStorage() {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+  return Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN?.trim() || process.env.BLOB_STORE_ID?.trim(),
+  );
 }
 
 /**
@@ -364,16 +367,17 @@ async function writeLocal(events) {
   await writeFile(LOCAL_PATH, `${JSON.stringify(events, null, 2)}\n`, "utf8");
 }
 
-/* ── blob store (single document) ── */
+/* ── blob store (single private document, same pattern as the waitlist) ── */
 async function readBlob() {
-  const { list } = await import("@vercel/blob");
+  const { list, get } = await import("@vercel/blob");
   const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
   const found = blobs.find((b) => b.pathname === BLOB_KEY);
   if (!found) return null;
-  const res = await fetch(found.url, { cache: "no-store" });
-  if (!res.ok) return null;
+  const result = await get(found.pathname, { access: "private" });
+  if (result?.statusCode !== 200 || !result.stream) return null;
   try {
-    const parsed = await res.json();
+    const text = await new Response(result.stream).text();
+    const parsed = JSON.parse(text);
     return Array.isArray(parsed) ? parsed : null;
   } catch {
     return null;
@@ -383,10 +387,9 @@ async function readBlob() {
 async function writeBlob(events) {
   const { put } = await import("@vercel/blob");
   await put(BLOB_KEY, JSON.stringify(events, null, 2), {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
     contentType: "application/json",
-    cacheControlMaxAge: 0,
   });
 }
 
