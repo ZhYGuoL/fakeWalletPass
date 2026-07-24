@@ -389,6 +389,7 @@ async function writeBlob(events) {
   await put(BLOB_KEY, JSON.stringify(events, null, 2), {
     access: "private",
     addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: "application/json",
   });
 }
@@ -396,8 +397,8 @@ async function writeBlob(events) {
 async function readStore() {
   try {
     return hasBlobStorage() ? await readBlob() : await readLocal();
-  } catch {
-    // A storage failure must never take down the read path.
+  } catch (err) {
+    console.error("EVENTS_READ_FAILED", err?.message ?? err);
     return null;
   }
 }
@@ -405,8 +406,8 @@ async function readStore() {
 async function writeStore(events) {
   try {
     return hasBlobStorage() ? await writeBlob(events) : await writeLocal(events);
-  } catch {
-    // Best-effort persistence; the seeded/in-memory data is still served.
+  } catch (err) {
+    console.error("EVENTS_WRITE_FAILED", err?.message ?? err);
     return undefined;
   }
 }
