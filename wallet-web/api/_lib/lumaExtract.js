@@ -34,6 +34,8 @@ const KNOWN_EVENT_ADDRESSES = {
   objb8rym: { address: "Chotto Matte San Francisco", until: "2026-08-01" },
   // Night Hack by Founders, Inc. - 2 Marina Blvd B300, San Francisco, CA 94123
   nighthack: { address: "Founders, Inc. | San Francisco Lab", until: "2026-08-01" },
+  // DrawBridge Presents: The Art of San Francisco - venue undisclosed, city only
+  xggm2di5: { address: "San Francisco, CA United States", until: "2026-08-01" },
 };
 
 function knownAddressFor(sourceUrl) {
