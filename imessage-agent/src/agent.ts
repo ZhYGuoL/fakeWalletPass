@@ -17,7 +17,7 @@ import {
   withThreadLock,
 } from "./inboundGuard.js";
 import { extractLumaEvent, findLumaUrl } from "./luma.js";
-import { generatePkpass } from "./pass.js";
+import { generatePkpass, trackTicketCreated } from "./pass.js";
 import {
   debugMessageContent,
   inboundLumaUrl,
@@ -72,6 +72,7 @@ async function deliverPass(space: Space, session: ReturnType<typeof getSession>)
 
   deliveringPass.add(id);
   try {
+    const eventUrl = session.draft.sourceUrl ?? session.draft.extracted.sourceUrl;
     const { buffer, filename } = await generatePkpass(session.draft);
     await space.send(
       "Here's your pass! Tap to add to Wallet.",
@@ -82,6 +83,8 @@ async function deliverPass(space: Space, session: ReturnType<typeof getSession>)
     );
     resetSession(id);
     suppressIdleReplies(id, 15_000);
+    // Bump the public leaderboard for this event (best-effort).
+    void trackTicketCreated(eventUrl);
   } finally {
     deliveringPass.delete(id);
   }
