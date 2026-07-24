@@ -369,15 +369,18 @@ async function writeLocal(events) {
 
 /* ── blob store (single private document, same pattern as the waitlist) ── */
 async function readBlob() {
-  const { list, get } = await import("@vercel/blob");
+  const { list } = await import("@vercel/blob");
   const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
   const found = blobs.find((b) => b.pathname === BLOB_KEY);
   if (!found) return null;
-  const result = await get(found.pathname, { access: "private" });
-  if (result?.statusCode !== 200 || !result.stream) return null;
+  // Private blobs: fetch the download URL with the RW token as bearer auth.
+  const res = await fetch(found.downloadUrl || found.url, {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+  });
+  if (!res.ok) return null;
   try {
-    const text = await new Response(result.stream).text();
-    const parsed = JSON.parse(text);
+    const parsed = await res.json();
     return Array.isArray(parsed) ? parsed : null;
   } catch {
     return null;
