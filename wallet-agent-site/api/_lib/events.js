@@ -41,7 +41,7 @@ export const SEED_EVENTS = [
     host: "Stripe · S09",
     location: "Embarcadero, SF",
     status: "Sold out",
-    url: "https://luma.com/xggm2di5",
+    url: "https://luma.com/stripe-misf26",
     ticketsCreated: 82,
   },
   {
