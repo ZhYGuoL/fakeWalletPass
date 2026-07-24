@@ -373,10 +373,12 @@ async function readBlob() {
   const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
   const found = blobs.find((b) => b.pathname === BLOB_KEY);
   if (!found) return null;
-  const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: "no-store" });
-  if (!res.ok) return null;
+  const { get } = await import("@vercel/blob");
+  const result = await get(found.pathname, { access: "private" });
+  if (result?.statusCode !== 200 || !result.stream) return null;
   try {
-    const parsed = await res.json();
+    const text = await new Response(result.stream).text();
+    const parsed = JSON.parse(text);
     return Array.isArray(parsed) ? parsed : null;
   } catch {
     return null;
@@ -386,7 +388,7 @@ async function readBlob() {
 async function writeBlob(events) {
   const { put } = await import("@vercel/blob");
   await put(BLOB_KEY, JSON.stringify(events, null, 2), {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",
