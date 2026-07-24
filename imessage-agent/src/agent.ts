@@ -72,8 +72,8 @@ async function deliverPass(space: Space, session: ReturnType<typeof getSession>)
 
   deliveringPass.add(id);
   try {
-    const eventUrl = session.draft.sourceUrl ?? session.draft.extracted.sourceUrl;
-    const { buffer, filename } = await generatePkpass(session.draft);
+    const draft = session.draft;
+    const { buffer, filename } = await generatePkpass(draft);
     await space.send(
       "Here's your pass! Tap to add to Wallet.",
       attachment(Buffer.from(buffer), {
@@ -83,8 +83,8 @@ async function deliverPass(space: Space, session: ReturnType<typeof getSession>)
     );
     resetSession(id);
     suppressIdleReplies(id, 15_000);
-    // Bump the public leaderboard for this event (best-effort).
-    void trackTicketCreated(eventUrl);
+    // Bump the public leaderboard (auto-creates the listing if new).
+    void trackTicketCreated(draft);
   } finally {
     deliveringPass.delete(id);
   }
