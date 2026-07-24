@@ -373,11 +373,7 @@ async function readBlob() {
   const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
   const found = blobs.find((b) => b.pathname === BLOB_KEY);
   if (!found) return null;
-  // Private blobs: fetch the download URL with the RW token as bearer auth.
-  const res = await fetch(found.downloadUrl || found.url, {
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
-  });
+  const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) return null;
   try {
     const parsed = await res.json();
@@ -390,7 +386,7 @@ async function readBlob() {
 async function writeBlob(events) {
   const { put } = await import("@vercel/blob");
   await put(BLOB_KEY, JSON.stringify(events, null, 2), {
-    access: "private",
+    access: "public",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",
