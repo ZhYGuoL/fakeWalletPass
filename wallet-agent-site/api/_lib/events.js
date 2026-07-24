@@ -33,17 +33,9 @@ export function hasBlobStorage() {
 /**
  * YC Startup School 2026 after-parties, ranked by predicted popularity from
  * the hosting company's brand pull and demand (sold-out parties draw the most
- * Keypass usage). The yacht gala tops the list at 91 tickets; the rest step down.
+ * Keypass usage). Stripe tops the list at 82 tickets; the rest step down.
  */
 export const SEED_EVENTS = [
-  {
-    name: "Ship 2 Prod: Black-Tie Yacht Gala",
-    host: "Resonance × GMI Cloud",
-    location: "Pier 40, Mission Bay",
-    status: "Open",
-    url: "https://luma.com/ojidqyj8",
-    ticketsCreated: 91,
-  },
   {
     name: "Stripe Presents: Made in San Francisco",
     host: "Stripe · S09",
