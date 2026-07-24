@@ -141,14 +141,6 @@ export const SEED_EVENTS = [
     ticketsCreated: 34,
   },
   {
-    name: "Anything But Names: Sonder × Lemma",
-    host: "Sonder × Lemma",
-    location: "SoMa, SF",
-    status: "Open",
-    url: "https://luma.com/wmw6rnmh",
-    ticketsCreated: 31,
-  },
-  {
     name: "Sandboxes & Sushi: YC @ Archil",
     host: "Archil · F24",
     location: "Union Square, SF",
