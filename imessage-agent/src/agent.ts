@@ -16,7 +16,12 @@ import {
   suppressIdleReplies,
   withThreadLock,
 } from "./inboundGuard.js";
-import { extractLumaEvent, findLumaUrl } from "./luma.js";
+import {
+  BLACKLIST_MESSAGE,
+  extractLumaEvent,
+  findLumaUrl,
+  isBlacklistedLumaUrl,
+} from "./luma.js";
 import { generatePkpass, trackTicketCreated } from "./pass.js";
 import {
   debugMessageContent,
@@ -135,6 +140,11 @@ export async function handleMessage(space: Space, message: Message): Promise<voi
 
     const lumaUrl = inboundLumaUrl(message) ?? findLumaUrl(text);
     if (lumaUrl) {
+      if (isBlacklistedLumaUrl(lumaUrl)) {
+        suppressIdleReplies(id, 30_000);
+        await space.send(BLACKLIST_MESSAGE);
+        return;
+      }
       suppressIdleReplies(id, 120_000);
       await space.responding(async () => {
         try {
