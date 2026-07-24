@@ -82,3 +82,21 @@ test("extracts fireside palette from cover_image", () => {
   const result = extractFromLumaHtml(html, "https://luma.com/4y89vpyu");
   assert.deepEqual(result.extracted.palette?.vibrant?.[0]?.color, "#1d3657");
 });
+
+test("fills in known venues so hidden addresses are never asked for", () => {
+  const html = `
+    <script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"initialData":{"kind":"event","data":{"start_at":"2026-07-25T01:30:00.000Z","hosts":[{"name":"Founders, Inc. Events"}],"ticket_types":[{"name":"Builder"}],"event":{"name":"Night Hack by Founders, Inc.","start_at":"2026-07-25T01:30:00.000Z","geo_address_visibility":"members","geo_address_info":{"sublocality":"Fort Mason"}}}}}}}</script>`;
+  const result = extractFromLumaHtml(html, "https://luma.com/nighthack?tk=abc123");
+  assert.equal(result.extracted.address, "Founders, Inc. | San Francisco Lab");
+  assert.equal(result.missingFields.includes("address"), false);
+  assert.equal(result.hiddenFields.includes("address"), false);
+});
+
+test("known venue overrides a scraped address so it stays stable", () => {
+  const html = `
+    <script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"initialData":{"kind":"event","data":{"start_at":"2026-07-25T01:00:00.000Z","hosts":[{"name":"Cosmo Guion"}],"ticket_types":[{"name":"Standard"}],"event":{"name":"JSV Summer Friday x Mercury","start_at":"2026-07-25T01:00:00.000Z","geo_address_visibility":"members","geo_address_info":{}}}}}}}</script>`;
+  const result = extractFromLumaHtml(html, "https://luma.com/objb8rym");
+  assert.equal(result.extracted.address, "Chotto Matte San Francisco");
+  assert.equal(result.extracted.locationName, "Chotto Matte San Francisco");
+  assert.equal(result.missingFields.includes("address"), false);
+});

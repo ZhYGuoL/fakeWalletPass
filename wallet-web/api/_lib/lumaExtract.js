@@ -18,6 +18,41 @@ export function normalizeLumaEventUrl(candidate) {
   return isValidLumaEventUrl(withScheme) ? withScheme : null;
 }
 
+/**
+ * Luma hides `geo_address_info` from anyone who is not already registered, so
+ * for these events the scrape comes back address-less and the agent has to stop
+ * and ask. We know these venues, so answer for the user instead. Keyed by event
+ * slug, which makes any `?tk=` access token on the URL irrelevant. Values match
+ * the single address line Luma's own pass puts in `event_address`; the full
+ * street address follows in a comment for reference.
+ */
+// Each override expires after the event window. `nighthack` is a reusable
+// vanity slug, so without an expiry a future Night Hack at a different venue
+// would silently inherit this address; `until` (UTC end-of-day) prevents that.
+const KNOWN_EVENT_ADDRESSES = {
+  // JSV Summer Friday x Mercury - 50 O'Farrell St, San Francisco, CA 94108
+  objb8rym: { address: "Chotto Matte San Francisco", until: "2026-08-01" },
+  // Night Hack by Founders, Inc. - 2 Marina Blvd B300, San Francisco, CA 94123
+  nighthack: { address: "Founders, Inc. | San Francisco Lab", until: "2026-08-01" },
+};
+
+function knownAddressFor(sourceUrl) {
+  try {
+    const url = new URL(
+      /^https?:\/\//i.test(sourceUrl) ? sourceUrl : `https://${sourceUrl}`,
+    );
+    const slug = url.pathname.replace(/^\/+|\/+$/g, "").split("/")[0];
+    const entry = slug ? KNOWN_EVENT_ADDRESSES[slug.toLowerCase()] : null;
+    if (!entry) return null;
+    if (entry.until && Date.now() > Date.parse(`${entry.until}T23:59:59Z`)) {
+      return null;
+    }
+    return entry.address;
+  } catch {
+    return null;
+  }
+}
+
 const META_RE = /<meta[^>]+property="([^"]+)"[^>]+content="([^"]*)"/gi;
 const TIME_RE = /<time[^>]+datetime="([^"]+)"/i;
 const NEXT_DATA_RE =
@@ -140,6 +175,14 @@ export function extractFromLumaHtml(html, sourceUrl) {
         : null),
     palette: fromNext?.palette || null,
   };
+
+  // A known venue wins over the scrape: it stays stable whether or not this
+  // request happens to see the address, so the agent never asks for these.
+  const knownAddress = knownAddressFor(sourceUrl);
+  if (knownAddress) {
+    extracted.address = knownAddress;
+    extracted.locationName = extracted.locationName || knownAddress;
+  }
 
   const ticketTypes = fromNext?.ticketTypes ?? [];
 
